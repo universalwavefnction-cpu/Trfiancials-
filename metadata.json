@@ -1,0 +1,5 @@
+{
+  "name": "Zenith Finance Tracker",
+  "description": "A comprehensive, visually-driven financial dashboard to track expenses, debt elimination, income, and investments on the journey to financial independence. All data is stored locally for privacy.",
+  "requestFramePermissions": []
+}
