@@ -20,11 +20,20 @@ const generateMonths = (startDate: Date, count: number) => {
     return months;
 };
 
-const AddIncomeForm: React.FC<{ onSave: (income: Omit<Income, 'id'>) => void; onCancel: () => void }> = ({ onSave, onCancel }) => {
-    const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
-    const [source, setSource] = useState<IncomeSource>(IncomeSource.Consulting);
-    const [amount, setAmount] = useState('');
-    const [description, setDescription] = useState('');
+interface IncomeFormProps {
+    onSave?: (income: Omit<Income, 'id'>) => void;
+    onUpdate?: (income: Income) => void;
+    onCancel: () => void;
+    initialData?: Income | null;
+}
+
+
+const IncomeForm: React.FC<IncomeFormProps> = ({ onSave, onUpdate, onCancel, initialData }) => {
+    const isEditMode = !!initialData;
+    const [date, setDate] = useState(initialData?.date || new Date().toISOString().split('T')[0]);
+    const [source, setSource] = useState<IncomeSource>(initialData?.source || IncomeSource.Consulting);
+    const [amount, setAmount] = useState(initialData?.amount.toString() || '');
+    const [description, setDescription] = useState(initialData?.description || '');
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -35,50 +44,54 @@ const AddIncomeForm: React.FC<{ onSave: (income: Omit<Income, 'id'>) => void; on
             description
         };
         if (date && source && !isNaN(newIncome.amount) && description) {
-            onSave(newIncome);
+            if(isEditMode && onUpdate && initialData) {
+                onUpdate({ ...newIncome, id: initialData.id });
+            } else if (!isEditMode && onSave) {
+                onSave(newIncome);
+            }
         } else {
             alert("Please fill all fields with valid data.");
         }
     };
     
     return (
-        <Card className="my-4 animate-fade-in">
-            <CardContent className="pt-6">
-                <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="my-4 p-4 bg-primary rounded-lg animate-fade-in">
+             <h3 className="text-lg font-semibold mb-4 text-text-primary">{isEditMode ? 'Edit Income' : 'Add New Income'}</h3>
+            <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="space-y-2">
+                    <label htmlFor="income-desc" className="text-sm font-medium text-text-secondary">Description</label>
+                    <input id="income-desc" type="text" placeholder="e.g., Project Phoenix" value={description} onChange={(e) => setDescription(e.target.value)} className="w-full bg-surface p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-accent" required />
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div className="space-y-2">
-                        <label htmlFor="income-desc" className="text-sm font-medium text-text-secondary">Description</label>
-                        <input id="income-desc" type="text" placeholder="e.g., Project Phoenix" value={description} onChange={(e) => setDescription(e.target.value)} className="w-full bg-primary p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-accent" required />
+                        <label htmlFor="income-date" className="text-sm font-medium text-text-secondary">Date</label>
+                        <input id="income-date" type="date" value={date} onChange={(e) => setDate(e.target.value)} className="w-full bg-surface p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-accent" required />
                     </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                        <div className="space-y-2">
-                            <label htmlFor="income-date" className="text-sm font-medium text-text-secondary">Date</label>
-                            <input id="income-date" type="date" value={date} onChange={(e) => setDate(e.target.value)} className="w-full bg-primary p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-accent" required />
-                        </div>
-                        <div className="space-y-2">
-                            <label htmlFor="income-amount" className="text-sm font-medium text-text-secondary">Amount (€)</label>
-                            <input id="income-amount" type="number" placeholder="1000" value={amount} onChange={(e) => setAmount(e.target.value)} className="w-full bg-primary p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-accent" required />
-                        </div>
-                        <div className="space-y-2">
-                            <label htmlFor="income-source" className="text-sm font-medium text-text-secondary">Source</label>
-                            {/* FIX: Explicitly type the event to ensure e.target.value is inferred as a string. */}
-                            <select id="income-source" value={source} onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setSource(e.target.value as IncomeSource)} className="w-full bg-primary p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-accent">
-                                {Object.values(IncomeSource).map(s => <option key={s} value={s}>{s}</option>)}
-                            </select>
-                        </div>
+                    <div className="space-y-2">
+                        <label htmlFor="income-amount" className="text-sm font-medium text-text-secondary">Amount (€)</label>
+                        <input id="income-amount" type="number" placeholder="1000" value={amount} onChange={(e) => setAmount(e.target.value)} className="w-full bg-surface p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-accent" required />
                     </div>
-                    <div className="flex justify-end space-x-3 pt-2">
-                        <button type="button" onClick={onCancel} className="px-4 py-2 bg-primary rounded-lg hover:bg-secondary transition-colors">Cancel</button>
-                        <button type="submit" className="px-4 py-2 bg-accent rounded-lg hover:bg-accent-hover text-white font-semibold transition-colors">Save Income</button>
+                    <div className="space-y-2">
+                        <label htmlFor="income-source" className="text-sm font-medium text-text-secondary">Source</label>
+                        <select id="income-source" value={source} onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setSource(e.target.value as IncomeSource)} className="w-full bg-surface p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-accent">
+                            {Object.values(IncomeSource).map(s => <option key={s} value={s}>{s}</option>)}
+                        </select>
                     </div>
-                </form>
-            </CardContent>
-        </Card>
+                </div>
+                <div className="flex justify-end space-x-3 pt-2">
+                    <button type="button" onClick={onCancel} className="px-4 py-2 bg-secondary rounded-lg hover:bg-primary transition-colors">Cancel</button>
+                    <button type="submit" className="px-4 py-2 bg-accent rounded-lg hover:bg-accent-hover text-white font-semibold transition-colors">{isEditMode ? 'Save Changes' : 'Save Income'}</button>
+                </div>
+            </form>
+        </div>
     );
 };
+
 
 const IncomeTracker: React.FC = () => {
     const { state, dispatch } = useFinancials();
     const [isAddingIncome, setIsAddingIncome] = useState(false);
+    const [editingIncome, setEditingIncome] = useState<Income | null>(null);
     const [goals, setGoals] = useState<{ [key: string]: string }>({});
 
     const months = useMemo(() => generateMonths(new Date(2024, 10, 1), 14), []); // Nov 2024 for 14 months
@@ -115,6 +128,7 @@ const IncomeTracker: React.FC = () => {
                 dispatch({ type: 'UPDATE_INCOME_GOAL', payload: { month, amount } });
             }
         });
+        alert('Goals saved successfully!');
     };
 
      const handleSaveIncome = (newIncomeData: Omit<Income, 'id'>) => {
@@ -122,6 +136,23 @@ const IncomeTracker: React.FC = () => {
         dispatch({ type: 'ADD_INCOME', payload: incomeToAdd });
         setIsAddingIncome(false);
     };
+
+    const handleUpdateIncome = (updatedIncome: Income) => {
+        dispatch({ type: 'UPDATE_INCOME', payload: updatedIncome });
+        setEditingIncome(null);
+    };
+
+    const handleDeleteIncome = (id: string) => {
+        if (window.confirm('Are you sure you want to delete this income entry?')) {
+            dispatch({ type: 'DELETE_INCOME', payload: { id } });
+        }
+    };
+
+    const handleStartEditing = (income: Income) => {
+        setIsAddingIncome(false);
+        setEditingIncome(income);
+    }
+
 
     return (
         <div className="space-y-6">
@@ -201,7 +232,7 @@ const IncomeTracker: React.FC = () => {
                         <CardHeader>
                             <div className="flex justify-between items-center">
                                 <CardTitle>Income Transactions</CardTitle>
-                                {!isAddingIncome && (
+                                {!isAddingIncome && !editingIncome && (
                                     <button onClick={() => setIsAddingIncome(true)} className="flex items-center space-x-2 px-3 py-2 bg-accent text-white font-semibold rounded-lg hover:bg-accent-hover transition-colors text-sm">
                                         <Icons.Plus className="w-4 h-4" />
                                         <span>Add Income</span>
@@ -210,15 +241,23 @@ const IncomeTracker: React.FC = () => {
                             </div>
                         </CardHeader>
                         <CardContent>
-                            {isAddingIncome && <AddIncomeForm onSave={handleSaveIncome} onCancel={() => setIsAddingIncome(false)} />}
-                            <div className="space-y-3 max-h-60 overflow-y-auto">
-                                {state.income.slice().reverse().map(inc => (
-                                    <div key={inc.id} className="flex justify-between items-center p-2 rounded-lg hover:bg-primary">
+                            {isAddingIncome && <IncomeForm onSave={handleSaveIncome} onCancel={() => setIsAddingIncome(false)} />}
+                            {editingIncome && <IncomeForm initialData={editingIncome} onUpdate={handleUpdateIncome} onCancel={() => setEditingIncome(null)} />}
+                            
+                            <div className="space-y-1 max-h-60 overflow-y-auto">
+                                {state.income.slice().sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).map(inc => (
+                                    <div key={inc.id} className="flex justify-between items-center p-2 rounded-lg hover:bg-primary group">
                                         <div>
                                             <p className="font-semibold">{inc.description}</p>
                                             <p className="text-sm text-text-secondary">{inc.source} &bull; {new Date(inc.date).toLocaleDateString()}</p>
                                         </div>
-                                        <p className="font-bold text-success">{formatCurrency(inc.amount)}</p>
+                                        <div className="flex items-center space-x-2">
+                                            <p className="font-bold text-success">{formatCurrency(inc.amount)}</p>
+                                            <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center space-x-1">
+                                                <button onClick={() => handleStartEditing(inc)} className="p-1 rounded-full text-text-secondary hover:text-accent hover:bg-surface"><Icons.Edit className="w-4 h-4" /></button>
+                                                <button onClick={() => handleDeleteIncome(inc.id)} className="p-1 rounded-full text-text-secondary hover:text-danger hover:bg-surface"><Icons.Trash className="w-4 h-4" /></button>
+                                            </div>
+                                        </div>
                                     </div>
                                 ))}
                             </div>

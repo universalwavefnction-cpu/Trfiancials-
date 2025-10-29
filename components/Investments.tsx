@@ -32,7 +32,9 @@ const AssetAllocationChart: React.FC = () => {
                     fill="#8884d8"
                     dataKey="value"
                     nameKey="name"
-                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                    // Fix: The `percent` prop from recharts can be undefined. Using `|| 0` ensures we always have a number
+                    // for the multiplication, preventing the type error on the arithmetic operation.
+                    label={({ name, percent }) => `${name} ${((percent || 0) * 100).toFixed(0)}%`}
                 >
                     {data.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />

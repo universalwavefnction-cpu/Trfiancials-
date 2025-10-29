@@ -122,11 +122,17 @@ export interface FinancialData {
 export type FinancialAction =
   | { type: "SET_STATE"; payload: FinancialData }
   | { type: "ADD_EXPENSE"; payload: Expense }
+  | { type: "UPDATE_EXPENSE"; payload: Expense }
+  | { type: "DELETE_EXPENSE"; payload: { id: string } }
   | { type: "ADD_RECURRING_EXPENSE"; payload: RecurringExpense }
   | { type: "DELETE_RECURRING_EXPENSE"; payload: { id: string } }
   | { type: "LOG_RECURRING_EXPENSES_FOR_MONTH"; payload: { month: string } }
   | { type: "ADD_DEBT"; payload: Debt }
+  | { type: "UPDATE_DEBT"; payload: Debt }
+  | { type: "DELETE_DEBT"; payload: { id: string } }
   | { type: "ADD_INCOME"; payload: Income }
+  | { type: "UPDATE_INCOME"; payload: Income }
+  | { type: "DELETE_INCOME"; payload: { id: string } }
   | { type: "ADD_ASSET"; payload: Asset }
   | { type: "ADD_PURCHASE"; payload: Purchase }
   | { type: "UPDATE_PURCHASE_STATUS"; payload: { id: string; status: PurchaseStatus } }

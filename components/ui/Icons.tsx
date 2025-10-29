@@ -22,6 +22,7 @@ import {
   Trash2,
   ArrowLeftRight,
   AlertTriangle,
+  Pencil,
 } from 'lucide-react';
 
 export const Icons = {
@@ -48,4 +49,5 @@ export const Icons = {
   Trash: Trash2,
   Sync: ArrowLeftRight,
   Warning: AlertTriangle,
+  Edit: Pencil,
 };

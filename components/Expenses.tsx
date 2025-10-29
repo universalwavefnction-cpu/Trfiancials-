@@ -20,60 +20,71 @@ const generateMonths = (startDate: Date, count: number) => {
     return months;
 };
 
-const AddExpenseForm: React.FC<{ onSave: (expense: Omit<Expense, 'id'>) => void; onCancel: () => void }> = ({ onSave, onCancel }) => {
-    const [description, setDescription] = useState('');
-    const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
-    const [amount, setAmount] = useState('');
-    const [category, setCategory] = useState<ExpenseCategory>(ExpenseCategory.Personal);
-    const [mode, setMode] = useState<ExpenseMode>(ExpenseMode.Growth);
+interface ExpenseFormProps {
+    onSave?: (expense: Omit<Expense, 'id'>) => void;
+    onUpdate?: (expense: Expense) => void;
+    onCancel: () => void;
+    initialData?: Expense | null;
+}
+
+const ExpenseForm: React.FC<ExpenseFormProps> = ({ onSave, onUpdate, onCancel, initialData }) => {
+    const isEditMode = !!initialData;
+    const [description, setDescription] = useState(initialData?.description || '');
+    const [date, setDate] = useState(initialData?.date || new Date().toISOString().split('T')[0]);
+    const [amount, setAmount] = useState(initialData?.amount.toString() || '');
+    const [category, setCategory] = useState<ExpenseCategory>(initialData?.category || ExpenseCategory.Personal);
+    const [mode, setMode] = useState<ExpenseMode>(initialData?.mode || ExpenseMode.Growth);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        const newExpense = { date, category, amount: parseFloat(amount), description, mode };
-        if (description && date && !isNaN(newExpense.amount)) {
-            onSave(newExpense);
+        const expenseData = { date, category, amount: parseFloat(amount), description, mode };
+        if (description && date && !isNaN(expenseData.amount)) {
+            if (isEditMode && onUpdate && initialData) {
+                onUpdate({ ...expenseData, id: initialData.id });
+            } else if (!isEditMode && onSave) {
+                onSave(expenseData);
+            }
         } else {
             alert("Please fill all fields with valid data.");
         }
     };
 
     return (
-        <Card className="my-4 animate-fade-in">
-            <CardContent className="pt-6">
-                <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="my-4 p-4 bg-primary rounded-lg animate-fade-in">
+            <h3 className="text-lg font-semibold mb-4 text-text-primary">{isEditMode ? 'Edit Expense' : 'Add New Expense'}</h3>
+            <form onSubmit={handleSubmit} className="space-y-4">
+                 <div className="space-y-2">
+                    <label htmlFor="exp-desc" className="text-sm font-medium text-text-secondary">Description</label>
+                    <input id="exp-desc" type="text" placeholder="e.g., Dinner with client" value={description} onChange={(e) => setDescription(e.target.value)} className="w-full bg-surface p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-accent" required />
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                      <div className="space-y-2">
-                        <label htmlFor="exp-desc" className="text-sm font-medium text-text-secondary">Description</label>
-                        <input id="exp-desc" type="text" placeholder="e.g., Dinner with client" value={description} onChange={(e) => setDescription(e.target.value)} className="w-full bg-primary p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-accent" required />
+                        <label htmlFor="exp-date" className="text-sm font-medium text-text-secondary">Date</label>
+                        <input id="exp-date" type="date" value={date} onChange={(e) => setDate(e.target.value)} className="w-full bg-surface p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-accent" required />
                     </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                         <div className="space-y-2">
-                            <label htmlFor="exp-date" className="text-sm font-medium text-text-secondary">Date</label>
-                            <input id="exp-date" type="date" value={date} onChange={(e) => setDate(e.target.value)} className="w-full bg-primary p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-accent" required />
-                        </div>
-                        <div className="space-y-2">
-                            <label htmlFor="exp-amount" className="text-sm font-medium text-text-secondary">Amount (€)</label>
-                            <input id="exp-amount" type="number" placeholder="50" value={amount} onChange={(e) => setAmount(e.target.value)} className="w-full bg-primary p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-accent" required />
-                        </div>
-                        <div className="space-y-2">
-                            <label htmlFor="exp-category" className="text-sm font-medium text-text-secondary">Category</label>
-                            <select id="exp-category" value={category} onChange={(e) => setCategory(e.target.value as ExpenseCategory)} className="w-full bg-primary p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-accent">
-                                {Object.values(ExpenseCategory).map(s => <option key={s} value={s}>{s}</option>)}
-                            </select>
-                        </div>
-                         <div className="space-y-2">
-                            <label htmlFor="exp-mode" className="text-sm font-medium text-text-secondary">Mode</label>
-                            <select id="exp-mode" value={mode} onChange={(e) => setMode(e.target.value as ExpenseMode)} className="w-full bg-primary p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-accent">
-                                {Object.values(ExpenseMode).map(s => <option key={s} value={s}>{s}</option>)}
-                            </select>
-                        </div>
+                    <div className="space-y-2">
+                        <label htmlFor="exp-amount" className="text-sm font-medium text-text-secondary">Amount (€)</label>
+                        <input id="exp-amount" type="number" placeholder="50" value={amount} onChange={(e) => setAmount(e.target.value)} className="w-full bg-surface p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-accent" required />
                     </div>
-                    <div className="flex justify-end space-x-3 pt-2">
-                        <button type="button" onClick={onCancel} className="px-4 py-2 bg-primary rounded-lg hover:bg-secondary transition-colors">Cancel</button>
-                        <button type="submit" className="px-4 py-2 bg-accent rounded-lg hover:bg-accent-hover text-white font-semibold transition-colors">Save Expense</button>
+                    <div className="space-y-2">
+                        <label htmlFor="exp-category" className="text-sm font-medium text-text-secondary">Category</label>
+                        <select id="exp-category" value={category} onChange={(e) => setCategory(e.target.value as ExpenseCategory)} className="w-full bg-surface p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-accent">
+                            {Object.values(ExpenseCategory).map(s => <option key={s} value={s}>{s}</option>)}
+                        </select>
                     </div>
-                </form>
-            </CardContent>
-        </Card>
+                     <div className="space-y-2">
+                        <label htmlFor="exp-mode" className="text-sm font-medium text-text-secondary">Mode</label>
+                        <select id="exp-mode" value={mode} onChange={(e) => setMode(e.target.value as ExpenseMode)} className="w-full bg-surface p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-accent">
+                            {Object.values(ExpenseMode).map(s => <option key={s} value={s}>{s}</option>)}
+                        </select>
+                    </div>
+                </div>
+                <div className="flex justify-end space-x-3 pt-2">
+                    <button type="button" onClick={onCancel} className="px-4 py-2 bg-secondary rounded-lg hover:bg-surface transition-colors">Cancel</button>
+                    <button type="submit" className="px-4 py-2 bg-accent rounded-lg hover:bg-accent-hover text-white font-semibold transition-colors">{isEditMode ? 'Save Changes' : 'Save Expense'}</button>
+                </div>
+            </form>
+        </div>
     );
 };
 
@@ -146,6 +157,7 @@ const ExpenseTracker: React.FC = () => {
     const { state, dispatch } = useFinancials();
     const [viewMode, setViewMode] = useState<ExpenseMode>(ExpenseMode.Growth);
     const [isAdding, setIsAdding] = useState(false);
+    const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
     const [isAddingRecurring, setIsAddingRecurring] = useState(false);
     const [plans, setPlans] = useState<{ [key: string]: string }>({});
 
@@ -192,6 +204,22 @@ const ExpenseTracker: React.FC = () => {
         const expenseToAdd: Expense = { id: `e-${Date.now()}`, ...newExpenseData };
         dispatch({ type: 'ADD_EXPENSE', payload: expenseToAdd });
         setIsAdding(false);
+    };
+
+    const handleUpdateExpense = (updatedExpense: Expense) => {
+        dispatch({ type: 'UPDATE_EXPENSE', payload: updatedExpense });
+        setEditingExpense(null);
+    };
+
+    const handleDeleteExpense = (id: string) => {
+        if (window.confirm('Are you sure you want to delete this expense?')) {
+            dispatch({ type: 'DELETE_EXPENSE', payload: { id } });
+        }
+    };
+
+    const handleStartEditing = (expense: Expense) => {
+        setIsAdding(false);
+        setEditingExpense(expense);
     };
 
     const handleSaveRecurringExpense = (data: Omit<RecurringExpense, 'id'>) => {
@@ -335,7 +363,7 @@ const ExpenseTracker: React.FC = () => {
                     <CardHeader>
                         <div className="flex justify-between items-center">
                             <CardTitle>Expense Transactions</CardTitle>
-                            {!isAdding && (
+                            {!isAdding && !editingExpense && (
                                 <button onClick={() => setIsAdding(true)} className="flex items-center space-x-2 px-3 py-2 bg-accent text-white font-semibold rounded-lg hover:bg-accent-hover transition-colors text-sm">
                                     <Icons.Plus className="w-4 h-4" />
                                     <span>Add Expense</span>
@@ -344,15 +372,23 @@ const ExpenseTracker: React.FC = () => {
                         </div>
                     </CardHeader>
                     <CardContent>
-                        {isAdding && <AddExpenseForm onSave={handleSaveExpense} onCancel={() => setIsAdding(false)} />}
-                        <div className="space-y-3 max-h-60 overflow-y-auto">
-                            {state.expenses.slice().reverse().map(exp => (
-                                <div key={exp.id} className="flex justify-between items-center p-2 rounded-lg hover:bg-primary">
+                        {isAdding && <ExpenseForm onSave={handleSaveExpense} onCancel={() => setIsAdding(false)} />}
+                        {editingExpense && <ExpenseForm initialData={editingExpense} onUpdate={handleUpdateExpense} onCancel={() => setEditingExpense(null)} />}
+
+                        <div className="space-y-1 max-h-60 overflow-y-auto">
+                            {state.expenses.slice().sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).map(exp => (
+                                <div key={exp.id} className="flex justify-between items-center p-2 rounded-lg hover:bg-primary group">
                                     <div>
                                         <p className="font-semibold">{exp.description}</p>
                                         <p className="text-sm text-text-secondary">{exp.category} &bull; {new Date(exp.date).toLocaleDateString()}</p>
                                     </div>
-                                    <p className="font-bold text-danger">{formatCurrency(exp.amount)}</p>
+                                    <div className="flex items-center space-x-2">
+                                        <p className="font-bold text-danger">{formatCurrency(exp.amount)}</p>
+                                        <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center space-x-1">
+                                            <button onClick={() => handleStartEditing(exp)} className="p-1 rounded-full text-text-secondary hover:text-accent hover:bg-surface"><Icons.Edit className="w-4 h-4" /></button>
+                                            <button onClick={() => handleDeleteExpense(exp.id)} className="p-1 rounded-full text-text-secondary hover:text-danger hover:bg-surface"><Icons.Trash className="w-4 h-4" /></button>
+                                        </div>
+                                    </div>
                                 </div>
                             ))}
                         </div>

@@ -64,10 +64,40 @@ const financialReducer = (state: FinancialData, action: FinancialAction): Financ
       return { ...initialState, ...action.payload };
     case 'ADD_EXPENSE':
       return { ...state, expenses: [...state.expenses, action.payload] };
+    case 'UPDATE_EXPENSE':
+        return {
+            ...state,
+            expenses: state.expenses.map(e => e.id === action.payload.id ? action.payload : e),
+        };
+    case 'DELETE_EXPENSE':
+        return {
+            ...state,
+            expenses: state.expenses.filter(e => e.id !== action.payload.id),
+        };
     case 'ADD_DEBT':
       return { ...state, debts: [...state.debts, action.payload] };
+    case 'UPDATE_DEBT':
+        return {
+            ...state,
+            debts: state.debts.map(d => d.id === action.payload.id ? action.payload : d),
+        };
+    case 'DELETE_DEBT':
+        return {
+            ...state,
+            debts: state.debts.filter(d => d.id !== action.payload.id),
+        };
     case 'ADD_INCOME':
       return { ...state, income: [...state.income, action.payload] };
+    case 'UPDATE_INCOME':
+        return {
+            ...state,
+            income: state.income.map(i => i.id === action.payload.id ? action.payload : i),
+        };
+    case 'DELETE_INCOME':
+        return {
+            ...state,
+            income: state.income.filter(i => i.id !== action.payload.id),
+        };
     case 'ADD_ASSET':
       return { ...state, assets: [...state.assets, action.payload] };
     case 'ADD_PURCHASE':

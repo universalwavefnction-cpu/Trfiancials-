@@ -7,48 +7,24 @@ import { Icons } from './ui/Icons';
 
 const formatCurrency = (value: number) => `€${value.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
-const DebtItem: React.FC<{ debt: Debt }> = ({ debt }) => {
-    const progress = (1 - debt.currentBalance / debt.originalAmount) * 100;
+interface DebtFormProps {
+    onSave?: (debt: Omit<Debt, 'id'>) => void;
+    onUpdate?: (debt: Debt) => void;
+    onCancel: () => void;
+    initialData?: Debt | null;
+}
 
-    return (
-        <Card className="hover:shadow-accent/20 transition-shadow">
-            <CardHeader>
-                <div className="flex justify-between items-center">
-                    <CardTitle>{debt.name}</CardTitle>
-                    <span className={`text-sm font-bold px-2 py-1 rounded-full ${debt.interestRate > 15 ? 'bg-danger/20 text-danger' : 'bg-warning/20 text-warning'}`}>
-                        {debt.interestRate.toFixed(1)}% APR
-                    </span>
-                </div>
-            </CardHeader>
-            <CardContent>
-                <div className="mb-4">
-                    <div className="flex justify-between text-text-primary font-semibold mb-1">
-                        <span>{formatCurrency(debt.currentBalance)}</span>
-                        <span className="text-text-secondary">of {formatCurrency(debt.originalAmount)}</span>
-                    </div>
-                    <div className="w-full bg-primary rounded-full h-3">
-                        <div className="bg-accent h-3 rounded-full" style={{ width: `${progress}%` }}></div>
-                    </div>
-                     <div className="text-right text-sm text-accent font-bold mt-1">{progress.toFixed(1)}% Paid Off</div>
-                </div>
-                <div className="text-sm text-text-secondary">
-                    Minimum Payment: <span className="font-semibold text-text-primary">{formatCurrency(debt.minimumPayment)}</span>
-                </div>
-            </CardContent>
-        </Card>
-    );
-};
-
-const AddDebtForm: React.FC<{ onSave: (debt: Omit<Debt, 'id'>) => void; onCancel: () => void }> = ({ onSave, onCancel }) => {
-    const [name, setName] = useState('');
-    const [originalAmount, setOriginalAmount] = useState('');
-    const [currentBalance, setCurrentBalance] = useState('');
-    const [interestRate, setInterestRate] = useState('');
-    const [minimumPayment, setMinimumPayment] = useState('');
+const DebtForm: React.FC<DebtFormProps> = ({ onSave, onUpdate, onCancel, initialData }) => {
+    const isEditMode = !!initialData;
+    const [name, setName] = useState(initialData?.name || '');
+    const [originalAmount, setOriginalAmount] = useState(initialData?.originalAmount.toString() || '');
+    const [currentBalance, setCurrentBalance] = useState(initialData?.currentBalance.toString() || '');
+    const [interestRate, setInterestRate] = useState(initialData?.interestRate.toString() || '');
+    const [minimumPayment, setMinimumPayment] = useState(initialData?.minimumPayment.toString() || '');
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        const newDebt: Omit<Debt, 'id'> = {
+        const debtData: Omit<Debt, 'id'> = {
             name,
             originalAmount: parseFloat(originalAmount),
             currentBalance: parseFloat(currentBalance),
@@ -56,17 +32,21 @@ const AddDebtForm: React.FC<{ onSave: (debt: Omit<Debt, 'id'>) => void; onCancel
             minimumPayment: parseFloat(minimumPayment),
         };
         
-        if (name && !isNaN(newDebt.originalAmount) && !isNaN(newDebt.currentBalance) && !isNaN(newDebt.interestRate) && !isNaN(newDebt.minimumPayment)) {
-            onSave(newDebt);
+        if (name && !isNaN(debtData.originalAmount) && !isNaN(debtData.currentBalance) && !isNaN(debtData.interestRate) && !isNaN(debtData.minimumPayment)) {
+            if (isEditMode && onUpdate && initialData) {
+                onUpdate({ ...debtData, id: initialData.id });
+            } else if (!isEditMode && onSave) {
+                onSave(debtData);
+            }
         } else {
             alert("Please fill all fields with valid data.");
         }
     };
 
     return (
-        <Card className="mt-4 animate-fade-in">
+        <Card className="my-4 animate-fade-in">
             <CardHeader>
-                <CardTitle>Add New Debt</CardTitle>
+                <CardTitle>{isEditMode ? 'Edit Debt' : 'Add New Debt'}</CardTitle>
             </CardHeader>
             <CardContent>
                 <form onSubmit={handleSubmit} className="space-y-4">
@@ -135,7 +115,7 @@ const AddDebtForm: React.FC<{ onSave: (debt: Omit<Debt, 'id'>) => void; onCancel
                     </div>
                     <div className="flex justify-end space-x-3 pt-2">
                         <button type="button" onClick={onCancel} className="px-4 py-2 bg-primary rounded-lg hover:bg-secondary transition-colors">Cancel</button>
-                        <button type="submit" className="px-4 py-2 bg-accent rounded-lg hover:bg-accent-hover text-white font-semibold transition-colors">Save Debt</button>
+                        <button type="submit" className="px-4 py-2 bg-accent rounded-lg hover:bg-accent-hover text-white font-semibold transition-colors">{isEditMode ? 'Save Changes' : 'Save Debt'}</button>
                     </div>
                 </form>
             </CardContent>
@@ -147,6 +127,7 @@ const AddDebtForm: React.FC<{ onSave: (debt: Omit<Debt, 'id'>) => void; onCancel
 const DebtDashboard: React.FC = () => {
     const { state, dispatch } = useFinancials();
     const [isAdding, setIsAdding] = useState(false);
+    const [editingDebt, setEditingDebt] = useState<Debt | null>(null);
     
     const { totalDebt, overallProgress, totalMinimumPayments } = useMemo(() => {
         const originalTotal = state.debts.reduce((sum, d) => sum + d.originalAmount, 0);
@@ -161,13 +142,27 @@ const DebtDashboard: React.FC = () => {
     }, [state.debts]);
 
      const handleSaveDebt = (newDebtData: Omit<Debt, 'id'>) => {
-        const debtToAdd: Debt = {
-            id: `d-${Date.now()}`,
-            ...newDebtData,
-        };
+        const debtToAdd: Debt = { id: `d-${Date.now()}`, ...newDebtData };
         dispatch({ type: 'ADD_DEBT', payload: debtToAdd });
         setIsAdding(false);
     };
+
+    const handleUpdateDebt = (updatedDebt: Debt) => {
+        dispatch({ type: 'UPDATE_DEBT', payload: updatedDebt });
+        setEditingDebt(null);
+    };
+
+    const handleDeleteDebt = (id: string) => {
+        if (window.confirm('Are you sure you want to delete this debt?')) {
+            dispatch({ type: 'DELETE_DEBT', payload: { id } });
+        }
+    };
+
+    const handleStartEditing = (debt: Debt) => {
+        setIsAdding(false);
+        setEditingDebt(debt);
+    };
+
 
     return (
         <div className="space-y-6">
@@ -190,7 +185,7 @@ const DebtDashboard: React.FC = () => {
             <div className="space-y-4">
                  <div className="flex justify-between items-center">
                     <h2 className="text-xl font-semibold text-text-primary">Active Debts</h2>
-                    {!isAdding && (
+                    {!isAdding && !editingDebt && (
                         <button 
                             onClick={() => setIsAdding(true)} 
                             className="flex items-center space-x-2 px-4 py-2 bg-accent text-white font-semibold rounded-lg hover:bg-accent-hover transition-colors"
@@ -200,12 +195,48 @@ const DebtDashboard: React.FC = () => {
                         </button>
                     )}
                 </div>
-
-                {isAdding && <AddDebtForm onSave={handleSaveDebt} onCancel={() => setIsAdding(false)} />}
                 
-                {state.debts.sort((a,b) => b.interestRate - a.interestRate).map(debt => (
-                    <DebtItem key={debt.id} debt={debt} />
-                ))}
+                {isAdding && <DebtForm onSave={handleSaveDebt} onCancel={() => setIsAdding(false)} />}
+                {editingDebt && <DebtForm initialData={editingDebt} onUpdate={handleUpdateDebt} onCancel={() => setEditingDebt(null)} />}
+                
+                <div className="space-y-4">
+                    {state.debts.sort((a,b) => b.interestRate - a.interestRate).map(debt => {
+                        const progress = (1 - debt.currentBalance / debt.originalAmount) * 100;
+                        return (
+                            <Card key={debt.id} className="hover:shadow-accent/20 transition-shadow group">
+                                <CardHeader>
+                                    <div className="flex justify-between items-center">
+                                        <CardTitle>{debt.name}</CardTitle>
+                                        <div className="flex items-center space-x-2">
+                                            <span className={`text-sm font-bold px-2 py-1 rounded-full ${debt.interestRate > 15 ? 'bg-danger/20 text-danger' : 'bg-warning/20 text-warning'}`}>
+                                                {debt.interestRate.toFixed(1)}% APR
+                                            </span>
+                                            <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center space-x-1">
+                                                <button onClick={() => handleStartEditing(debt)} className="p-1 rounded-full text-text-secondary hover:text-accent hover:bg-surface"><Icons.Edit className="w-4 h-4" /></button>
+                                                <button onClick={() => handleDeleteDebt(debt.id)} className="p-1 rounded-full text-text-secondary hover:text-danger hover:bg-surface"><Icons.Trash className="w-4 h-4" /></button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </CardHeader>
+                                <CardContent>
+                                    <div className="mb-4">
+                                        <div className="flex justify-between text-text-primary font-semibold mb-1">
+                                            <span>{formatCurrency(debt.currentBalance)}</span>
+                                            <span className="text-text-secondary">of {formatCurrency(debt.originalAmount)}</span>
+                                        </div>
+                                        <div className="w-full bg-primary rounded-full h-3">
+                                            <div className="bg-accent h-3 rounded-full" style={{ width: `${progress}%` }}></div>
+                                        </div>
+                                        <div className="text-right text-sm text-accent font-bold mt-1">{progress.toFixed(1)}% Paid Off</div>
+                                    </div>
+                                    <div className="text-sm text-text-secondary">
+                                        Minimum Payment: <span className="font-semibold text-text-primary">{formatCurrency(debt.minimumPayment)}</span>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        )
+                    })}
+                </div>
             </div>
         </div>
     );
