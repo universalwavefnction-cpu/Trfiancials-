@@ -26,7 +26,7 @@ export interface Expense {
 }
 
 export interface RecurringExpense {
-  id: string;
+  id:string;
   description: string;
   amount: number;
   category: ExpenseCategory;
@@ -135,4 +135,4 @@ export type FinancialAction =
   | { type: "UPDATE_DEBT_BALANCE"; payload: { id: string; newBalance: number } }
   | { type: "UPDATE_ASSET_VALUE"; payload: { id: string; newValue: number } };
 
-export type View = "dashboard" | "expenses" | "debts" | "income" | "investments" | "purchases";
+export type View = "dashboard" | "expenses" | "debts" | "income" | "investments" | "purchases" | "sync";

@@ -20,6 +20,8 @@ import {
   BrainCircuit,
   Settings,
   Trash2,
+  ArrowLeftRight,
+  AlertTriangle,
 } from 'lucide-react';
 
 export const Icons = {
@@ -44,4 +46,6 @@ export const Icons = {
   Insights: BrainCircuit,
   Settings: Settings,
   Trash: Trash2,
+  Sync: ArrowLeftRight,
+  Warning: AlertTriangle,
 };

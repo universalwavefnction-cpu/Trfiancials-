@@ -1,6 +1,6 @@
 
 import React, { useState, useCallback } from 'react';
-import { FinancialProvider, useFinancials } from './context/FinancialContext';
+import { FinancialProvider } from './context/FinancialContext';
 import { View } from './types';
 import { Icons } from './components/ui/Icons';
 import Dashboard from './components/Dashboard';
@@ -9,6 +9,7 @@ import Debts from './components/Debts';
 import Income from './components/Income';
 import Investments from './components/Investments';
 import Purchases from './components/Purchases';
+import Sync from './components/Sync';
 
 const NavItem: React.FC<{
   icon: React.ElementType;
@@ -50,41 +51,6 @@ const MobileNavItem: React.FC<{
 
 const AppContent: React.FC = () => {
   const [currentView, setCurrentView] = useState<View>('dashboard');
-  const { state, dispatch } = useFinancials();
-
-  const handleExport = useCallback(() => {
-    const dataStr = JSON.stringify(state, null, 2);
-    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-    const exportFileDefaultName = 'zenith_finance_backup.json';
-    const linkElement = document.createElement('a');
-    linkElement.setAttribute('href', dataUri);
-    linkElement.setAttribute('download', exportFileDefaultName);
-    linkElement.click();
-  }, [state]);
-
-  const handleImport = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        try {
-          const json = JSON.parse(e.target?.result as string);
-          // Basic validation
-          if (json.expenses && json.debts && json.income && json.assets) {
-            dispatch({ type: 'SET_STATE', payload: json });
-            alert('Data imported successfully!');
-          } else {
-            alert('Invalid file format.');
-          }
-        } catch (error) {
-          alert('Error reading file.');
-        }
-      };
-      reader.readAsText(file);
-    }
-    // Reset file input to allow re-uploading the same file
-    event.target.value = '';
-  }, [dispatch]);
 
   const navItems = [
     { view: 'dashboard', icon: Icons.Dashboard, label: 'Dashboard' },
@@ -93,6 +59,7 @@ const AppContent: React.FC = () => {
     { view: 'income', icon: Icons.Income, label: 'Income' },
     { view: 'investments', icon: Icons.Investments, label: 'Investments' },
     { view: 'purchases', icon: Icons.Purchases, label: 'Purchases' },
+    { view: 'sync', icon: Icons.Sync, label: 'Sync & Backup' },
   ] as const;
 
   const renderView = () => {
@@ -103,6 +70,7 @@ const AppContent: React.FC = () => {
       case 'income': return <Income />;
       case 'investments': return <Investments />;
       case 'purchases': return <Purchases />;
+      case 'sync': return <Sync />;
       default: return <Dashboard />;
     }
   };
@@ -126,16 +94,6 @@ const AppContent: React.FC = () => {
                 />
             ))}
         </nav>
-        <div className="px-4 py-4 border-t border-primary space-y-2">
-            <button onClick={handleExport} className="flex items-center w-full px-4 py-3 text-sm font-medium text-text-secondary hover:bg-primary hover:text-text-primary rounded-lg group">
-                <Icons.JSON className="w-5 h-5 mr-3" /> Export Data
-            </button>
-             <label className="flex items-center w-full px-4 py-3 text-sm font-medium text-text-secondary hover:bg-primary hover:text-text-primary rounded-lg group cursor-pointer">
-                <Icons.Upload className="w-5 h-5 mr-3" />
-                <span>Import Data</span>
-                <input type="file" accept=".json" className="hidden" onChange={handleImport} />
-            </label>
-        </div>
       </aside>
 
       {/* Main Content */}

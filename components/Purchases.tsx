@@ -16,7 +16,7 @@ const ItemTypes = {
 const PurchaseCard: React.FC<{ purchase: Purchase }> = ({ purchase }) => {
   const [{ isDragging }, drag] = useDrag(() => ({
     type: ItemTypes.PURCHASE,
-    item: { id: purchase.id },
+    item: purchase,
     collect: (monitor) => ({
       isDragging: !!monitor.isDragging(),
     }),
@@ -47,31 +47,27 @@ const StatusColumn: React.FC<{ status: PurchaseStatus; children: React.ReactNode
     
     const [{ isOver }, drop] = useDrop(() => ({
         accept: ItemTypes.PURCHASE,
-        drop: (item: { id: string }) => handleDrop(item.id),
+        drop: (item: Purchase) => handleDrop(item),
         collect: (monitor) => ({
             isOver: !!monitor.isOver(),
         }),
     }));
 
-    const handleDrop = (purchaseId: string) => {
-        dispatch({ type: 'UPDATE_PURCHASE_STATUS', payload: { id: purchaseId, status } });
+    const handleDrop = (purchase: Purchase) => {
+        dispatch({ type: 'UPDATE_PURCHASE_STATUS', payload: { id: purchase.id, status } });
 
         if (status === PurchaseStatus.Purchased) {
-            const { purchases } = (window as any).__financial_context_state; // Hack to get latest state
-            const purchase = purchases.find((p: Purchase) => p.id === purchaseId);
-            if (purchase) {
-                dispatch({
-                    type: 'ADD_EXPENSE',
-                    payload: {
-                        id: `exp-from-pur-${purchase.id}`,
-                        date: new Date().toISOString().split('T')[0],
-                        category: purchase.category,
-                        amount: purchase.cost,
-                        description: purchase.name,
-                        mode: ExpenseMode.Growth, // Defaulting to growth, could be made configurable
-                    }
-                });
-            }
+             dispatch({
+                type: 'ADD_EXPENSE',
+                payload: {
+                    id: `exp-from-pur-${purchase.id}`,
+                    date: new Date().toISOString().split('T')[0],
+                    category: purchase.category,
+                    amount: purchase.cost,
+                    description: purchase.name,
+                    mode: ExpenseMode.Growth, // Defaulting to growth, could be made configurable
+                }
+            });
         }
     };
 
@@ -152,9 +148,6 @@ const PurchasesComponent: React.FC = () => {
     const { state, dispatch } = useFinancials();
     const [isAdding, setIsAdding] = useState(false);
     
-    // A bit of a hack to ensure the drop handler has access to the latest state for creating an expense.
-    (window as any).__financial_context_state = state;
-
     const purchasesByStatus = useMemo(() => {
         return state.purchases.reduce((acc, p) => {
             acc[p.status] = acc[p.status] || [];
