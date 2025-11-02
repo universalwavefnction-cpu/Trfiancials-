@@ -67,7 +67,8 @@ export const getFinancialRundown = async (financialData: FinancialData, months: 
     const ai = new GoogleGenAI({ apiKey });
 
     // Calculate inputs for the prompt
-    const totalLiquidAssets = financialData.assets
+    const totalLiquidAssets = financialData.investmentBaskets
+      .flatMap(b => b.assets)
       .filter(a => a.category === AssetCategory.Savings || a.category === AssetCategory.EmergencyFund)
       .reduce((sum, a) => sum + a.currentValue, 0);
 

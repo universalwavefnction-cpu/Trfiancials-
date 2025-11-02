@@ -90,6 +90,12 @@ export interface Asset {
   date: string;
 }
 
+export interface InvestmentBasket {
+  id: string;
+  name: string;
+  assets: Asset[];
+}
+
 export enum PurchaseStatus {
     Considering = "Considering",
     Purchased = "Purchased",
@@ -112,7 +118,7 @@ export interface FinancialData {
   recurringExpenses: RecurringExpense[];
   debts: Debt[];
   income: Income[];
-  assets: Asset[];
+  investmentBaskets: InvestmentBasket[];
   incomeGoals: IncomeGoal[];
   purchases: Purchase[];
 }
@@ -132,11 +138,13 @@ export type FinancialAction =
   | { type: "ADD_INCOME"; payload: Income }
   | { type: "UPDATE_INCOME"; payload: Income }
   | { type: "DELETE_INCOME"; payload: { id: string } }
-  | { type: "ADD_ASSET"; payload: Asset }
   | { type: "ADD_PURCHASE"; payload: Purchase }
   | { type: "UPDATE_PURCHASE_STATUS"; payload: { id: string; status: PurchaseStatus } }
   | { type: "UPDATE_INCOME_GOAL"; payload: { month: string; amount: number } }
   | { type: "UPDATE_DEBT_BALANCE"; payload: { id: string; newBalance: number } }
-  | { type: "UPDATE_ASSET_VALUE"; payload: { id: string; newValue: number } };
+  | { type: "UPDATE_BASKET_NAME"; payload: { basketId: string; name: string } }
+  | { type: "ADD_ASSET"; payload: { basketId: string; assetData: Omit<Asset, 'id'> } }
+  | { type: "UPDATE_ASSET"; payload: { basketId: string; asset: Asset } }
+  | { type: "DELETE_ASSET"; payload: { basketId: string; assetId: string } };
 
 export type View = "dashboard" | "expenses" | "debts" | "income" | "investments" | "purchases" | "sync" | "rundown" | "settings";

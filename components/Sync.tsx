@@ -1,4 +1,3 @@
-
 import React, { useCallback } from 'react';
 import { useFinancials } from '../context/FinancialContext';
 import { Card, CardHeader, CardTitle, CardContent } from './ui/Card';
@@ -25,7 +24,7 @@ const Sync: React.FC = () => {
                 try {
                     const json = JSON.parse(e.target?.result as string);
                     // Basic validation
-                    if (json.expenses && json.debts && json.income && json.assets) {
+                    if (json.expenses && json.debts && json.income && json.investmentBaskets) {
                         if (window.confirm("Are you sure? Importing data will overwrite all existing data on this device.")) {
                             dispatch({ type: 'SET_STATE', payload: json });
                             alert('Data imported successfully!');

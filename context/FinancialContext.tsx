@@ -31,11 +31,29 @@ const initialState: FinancialData = {
     { id: 'i2', date: '2025-11-28', source: IncomeSource.Newsletter, amount: 50, description: 'November Payout' },
     { id: 'i3', date: '2025-12-15', source: IncomeSource.Consulting, amount: 1500, description: 'Project Bravo' },
   ],
-  assets: [
-    { id: 'a1', name: 'Emergency Fund', category: AssetCategory.EmergencyFund, amountInvested: 3000, currentValue: 3000, date: '2024-01-01' },
-    { id: 'a2', name: 'Savings Account', category: AssetCategory.Savings, amountInvested: 500, currentValue: 500, date: '2024-01-01' },
-    { id: 'a3', name: 'Bitcoin', category: AssetCategory.Crypto, amountInvested: 1000, currentValue: 1500, date: '2023-06-15' },
-    { id: 'a4', name: 'VWCE ETF', category: AssetCategory.StocksETFs, amountInvested: 800, currentValue: 950, date: '2023-08-20' },
+  investmentBaskets: [
+    {
+      id: 'b1',
+      name: 'Long-Term Growth',
+      assets: [
+        { id: 'a4', name: 'VWCE ETF', category: AssetCategory.StocksETFs, amountInvested: 800, currentValue: 950, date: '2023-08-20' },
+      ],
+    },
+    {
+      id: 'b2',
+      name: 'Speculative Plays',
+      assets: [
+        { id: 'a3', name: 'Bitcoin', category: AssetCategory.Crypto, amountInvested: 1000, currentValue: 1500, date: '2023-06-15' },
+      ],
+    },
+    {
+      id: 'b3',
+      name: 'Safe Haven',
+      assets: [
+        { id: 'a1', name: 'Emergency Fund', category: AssetCategory.EmergencyFund, amountInvested: 3000, currentValue: 3000, date: '2024-01-01' },
+        { id: 'a2', name: 'Savings Account', category: AssetCategory.Savings, amountInvested: 500, currentValue: 500, date: '2024-01-01' },
+      ],
+    }
   ],
   incomeGoals: months.map((m, i) => ({ id: `ig${i + 1}`, month: m, amount: incomeGoalAmounts[i] })),
   purchases: [
@@ -91,8 +109,6 @@ const financialReducer = (state: FinancialData, action: FinancialAction): Financ
             ...state,
             income: state.income.filter(i => i.id !== action.payload.id),
         };
-    case 'ADD_ASSET':
-      return { ...state, assets: [...state.assets, action.payload] };
     case 'ADD_PURCHASE':
         return { ...state, purchases: [...state.purchases, action.payload] };
     case 'UPDATE_PURCHASE_STATUS':
@@ -114,24 +130,20 @@ const financialReducer = (state: FinancialData, action: FinancialAction): Financ
     case 'LOG_RECURRING_EXPENSES_FOR_MONTH': {
         const { month } = action.payload; // e.g. "2025-11"
         
-        // Find recurring expenses that should be active for this month
         const applicableRecurring = state.recurringExpenses
             .filter(re => new Date(re.startDate + "-01T00:00:00Z") <= new Date(month + "-01T00:00:00Z"));
             
-        // Get the set of IDs of all existing expenses for faster lookup
         const existingExpenseIds = new Set(state.expenses.map(e => e.id));
         
         const newExpensesToAdd: Expense[] = [];
         
         applicableRecurring.forEach(re => {
-            // Create a deterministic ID for the logged expense
             const loggedExpenseId = `logged-${re.id}-${month}`;
             
-            // Only add if an expense with this ID doesn't already exist
             if (!existingExpenseIds.has(loggedExpenseId)) {
                 newExpensesToAdd.push({
                     id: loggedExpenseId,
-                    date: `${month}-01`, // Log to the first of the month
+                    date: `${month}-01`,
                     category: re.category,
                     amount: re.amount,
                     description: `${re.description} (Recurring)`,
@@ -140,7 +152,6 @@ const financialReducer = (state: FinancialData, action: FinancialAction): Financ
             }
         });
 
-        // If there's nothing new to add, just return the current state
         if (newExpensesToAdd.length === 0) {
             return state;
         }
@@ -170,11 +181,39 @@ const financialReducer = (state: FinancialData, action: FinancialAction): Financ
         ...state,
         debts: state.debts.map(d => d.id === action.payload.id ? { ...d, currentBalance: action.payload.newBalance } : d),
       };
-    case 'UPDATE_ASSET_VALUE':
+    case 'UPDATE_BASKET_NAME':
       return {
         ...state,
-        // FIX: The variable in the map is 'a', not 'd'. Changed 'd' to 'a'.
-        assets: state.assets.map(a => a.id === action.payload.id ? { ...a, currentValue: action.payload.newValue } : a),
+        investmentBaskets: state.investmentBaskets.map(b => 
+          b.id === action.payload.basketId ? { ...b, name: action.payload.name } : b
+        ),
+      };
+    case 'ADD_ASSET': {
+      const newAsset: Asset = { id: `a-${Date.now()}`, ...action.payload.assetData };
+      return {
+        ...state,
+        investmentBaskets: state.investmentBaskets.map(b =>
+          b.id === action.payload.basketId ? { ...b, assets: [...b.assets, newAsset] } : b
+        ),
+      };
+    }
+    case 'UPDATE_ASSET':
+      return {
+        ...state,
+        investmentBaskets: state.investmentBaskets.map(b =>
+          b.id === action.payload.basketId
+            ? { ...b, assets: b.assets.map(a => a.id === action.payload.asset.id ? action.payload.asset : a) }
+            : b
+        ),
+      };
+    case 'DELETE_ASSET':
+      return {
+        ...state,
+        investmentBaskets: state.investmentBaskets.map(b =>
+          b.id === action.payload.basketId
+            ? { ...b, assets: b.assets.filter(a => a.id !== action.payload.assetId) }
+            : b
+        ),
       };
     default:
       return state;
@@ -194,10 +233,9 @@ export const FinancialProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     setStoredState(state);
   }, [state, setStoredState]);
   
-  // A one-time check to see if local storage is empty and if so, populate with initial data.
   useEffect(() => {
     const rawData = window.localStorage.getItem('financialData');
-    if (!rawData || !JSON.parse(rawData).expenses) { // Simple check if data exists
+    if (!rawData || !JSON.parse(rawData).expenses) { 
       dispatch({ type: 'SET_STATE', payload: initialState });
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps

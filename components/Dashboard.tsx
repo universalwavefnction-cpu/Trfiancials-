@@ -11,11 +11,11 @@ const formatCurrency = (value: number) => `€${value.toLocaleString('de-DE', { 
 const NetWorthTracker: React.FC = () => {
     const { state } = useFinancials();
     const { totalAssets, totalDebts, netWorth } = useMemo(() => {
-        const totalAssets = state.assets.reduce((sum, asset) => sum + asset.currentValue, 0);
+        const totalAssets = state.investmentBaskets.flatMap(b => b.assets).reduce((sum, asset) => sum + asset.currentValue, 0);
         const totalDebts = state.debts.reduce((sum, debt) => sum + debt.currentBalance, 0);
         const netWorth = totalAssets - totalDebts;
         return { totalAssets, totalDebts, netWorth };
-    }, [state.assets, state.debts]);
+    }, [state.investmentBaskets, state.debts]);
 
     return (
         <Card>
@@ -43,10 +43,10 @@ const GoalProgress: React.FC = () => {
     const { state } = useFinancials();
     const goal = 1000000;
     const netWorth = useMemo(() => {
-        const totalAssets = state.assets.reduce((sum, asset) => sum + asset.currentValue, 0);
+        const totalAssets = state.investmentBaskets.flatMap(b => b.assets).reduce((sum, asset) => sum + asset.currentValue, 0);
         const totalDebts = state.debts.reduce((sum, debt) => sum + debt.currentBalance, 0);
         return totalAssets - totalDebts;
-    }, [state.assets, state.debts]);
+    }, [state.investmentBaskets, state.debts]);
     const progress = Math.max(0, (netWorth / goal) * 100);
 
     return (
@@ -199,11 +199,12 @@ const InsightsEngine: React.FC = () => {
         setError('');
         setInsight('');
         try {
+            const allAssets = state.investmentBaskets.flatMap(b => b.assets);
             const financialSummary = `
                 Expenses: ${state.expenses.length} transactions this month.
                 Debts: ${state.debts.length} active debts, total balance ${state.debts.reduce((s, d) => s + d.currentBalance, 0)} EUR.
                 Income: ${state.income.length} sources this month.
-                Assets: ${state.assets.length} assets, total value ${state.assets.reduce((s, a) => s + a.currentValue, 0)} EUR.
+                Assets: ${allAssets.length} assets, total value ${allAssets.reduce((s, a) => s + a.currentValue, 0)} EUR.
             `;
             const result = await getFinancialInsights(financialSummary);
             if (result.toLowerCase().includes("error") || result.toLowerCase().includes("api key")) {
