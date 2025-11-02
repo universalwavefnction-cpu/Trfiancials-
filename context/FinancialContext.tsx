@@ -116,22 +116,43 @@ const financialReducer = (state: FinancialData, action: FinancialAction): Financ
     case 'DELETE_RECURRING_EXPENSE':
         return { ...state, recurringExpenses: state.recurringExpenses.filter(re => re.id !== action.payload.id) };
     case 'LOG_RECURRING_EXPENSES_FOR_MONTH': {
-        const { month } = action.payload; // e.g. "2024-11"
-        const expensesForMonth = state.recurringExpenses
-            .filter(re => new Date(re.startDate) <= new Date(month))
-            .map(re => ({
-                id: `e-${re.id}-${month}-${Date.now()}`,
-                date: `${month}-01`, // log to the first of the month
-                category: re.category,
-                amount: re.amount,
-                description: re.description,
-                mode: re.mode,
-            }));
-        // Avoid adding duplicates
-        const existingDescriptions = new Set(state.expenses.filter(e => e.date.startsWith(month)).map(e => e.description));
-        const newExpensesToAdd = expensesForMonth.filter(e => !existingDescriptions.has(e.description));
+        const { month } = action.payload; // e.g. "2025-11"
+        
+        // Find recurring expenses that should be active for this month
+        const applicableRecurring = state.recurringExpenses
+            .filter(re => new Date(re.startDate + "-01T00:00:00Z") <= new Date(month + "-01T00:00:00Z"));
+            
+        // Get the set of IDs of all existing expenses for faster lookup
+        const existingExpenseIds = new Set(state.expenses.map(e => e.id));
+        
+        const newExpensesToAdd: Expense[] = [];
+        
+        applicableRecurring.forEach(re => {
+            // Create a deterministic ID for the logged expense
+            const loggedExpenseId = `logged-${re.id}-${month}`;
+            
+            // Only add if an expense with this ID doesn't already exist
+            if (!existingExpenseIds.has(loggedExpenseId)) {
+                newExpensesToAdd.push({
+                    id: loggedExpenseId,
+                    date: `${month}-01`, // Log to the first of the month
+                    category: re.category,
+                    amount: re.amount,
+                    description: `${re.description} (Recurring)`,
+                    mode: re.mode,
+                });
+            }
+        });
 
-        return { ...state, expenses: [...state.expenses, ...newExpensesToAdd] };
+        // If there's nothing new to add, just return the current state
+        if (newExpensesToAdd.length === 0) {
+            return state;
+        }
+
+        return { 
+            ...state, 
+            expenses: [...state.expenses, ...newExpensesToAdd] 
+        };
     }
     case 'UPDATE_INCOME_GOAL': {
       const { month, amount } = action.payload;

@@ -206,7 +206,7 @@ const InsightsEngine: React.FC = () => {
                 Assets: ${state.assets.length} assets, total value ${state.assets.reduce((s, a) => s + a.currentValue, 0)} EUR.
             `;
             const result = await getFinancialInsights(financialSummary);
-            if (result.includes("Could not") || result.includes("unexpected error")) {
+            if (result.toLowerCase().includes("error") || result.toLowerCase().includes("api key")) {
                 setError(result);
             } else {
                 setInsight(result);
@@ -275,7 +275,7 @@ const RundownEngine: React.FC = () => {
         setForecast('');
         try {
             const result = await getFinancialRundown(state, months);
-            if(result.includes("Could not") || result.includes("unexpected error")) {
+            if(result.toLowerCase().includes("error") || result.toLowerCase().includes("api key")) {
                 setError(result);
             } else {
                 setForecast(result);
@@ -330,9 +330,9 @@ const RundownEngine: React.FC = () => {
                 </div>
 
                 {error && (
-                    <div className="mt-4 p-4 bg-danger/20 rounded-lg">
+                    <div className="mt-4 p-4 bg-danger/10 rounded-lg">
                         <p className="font-semibold text-danger">Error</p>
-                        <p className="text-text-secondary">{error}</p>
+                        <p className="text-text-secondary text-sm">{error}</p>
                     </div>
                 )}
 

@@ -1,13 +1,29 @@
-
 import { GoogleGenAI } from "@google/genai";
 import { FinancialData, AssetCategory } from '../types';
 
 const getApiKey = (): string => {
-    const apiKey = process.env.API_KEY;
-    if (!apiKey) {
-        throw new Error("API_KEY environment variable not set.");
+    // Priority 1: Environment variable (for deployed/build environments)
+    const envApiKey = process.env.API_KEY;
+    if (envApiKey) {
+        return envApiKey;
     }
-    return apiKey;
+
+    // Priority 2: Local storage (for user-provided key in the browser)
+    try {
+        const storedApiKey = window.localStorage.getItem('geminiApiKey');
+        if (storedApiKey) {
+            // The useLocalStorage hook JSON.stringifies the value, so we parse it.
+            const parsedKey = JSON.parse(storedApiKey);
+            if (typeof parsedKey === 'string' && parsedKey.trim() !== '') {
+                return parsedKey;
+            }
+        }
+    } catch (error) {
+        console.error("Could not retrieve API key from local storage", error);
+    }
+    
+    // If no key is found
+    throw new Error("API key not found. Please go to the Settings page to configure your Gemini API key.");
 };
 
 
@@ -38,8 +54,8 @@ export const getFinancialInsights = async (financialSummary: string): Promise<st
     return response.text.trim();
   } catch (error) {
     console.error("Error generating financial insight:", error);
-    if (error instanceof Error && error.message.includes("API_KEY")) {
-        return "Could not get insight. Please ensure your Gemini API key is configured correctly.";
+    if (error instanceof Error) {
+        return error.message;
     }
     return "An unexpected error occurred while generating your financial insight.";
   }
@@ -119,8 +135,8 @@ export const getFinancialRundown = async (financialData: FinancialData, months: 
 
   } catch (error) {
     console.error("Error generating financial rundown:", error);
-    if (error instanceof Error && error.message.includes("API_KEY")) {
-      return "Could not generate rundown. Please ensure your Gemini API key is configured correctly.";
+    if (error instanceof Error) {
+        return error.message;
     }
     return "An unexpected error occurred while generating your financial rundown.";
   }

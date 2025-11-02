@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback } from 'react';
 import { FinancialProvider } from './context/FinancialContext';
 import { View } from './types';
@@ -11,6 +10,7 @@ import Investments from './components/Investments';
 import Purchases from './components/Purchases';
 import Sync from './components/Sync';
 import Rundown from './components/Rundown';
+import Settings from './components/Settings';
 
 const NavItem: React.FC<{
   icon: React.ElementType;
@@ -62,6 +62,7 @@ const AppContent: React.FC = () => {
     { view: 'purchases', icon: Icons.Purchases, label: 'Purchases' },
     { view: 'rundown', icon: Icons.Rundown, label: 'Rundown' },
     { view: 'sync', icon: Icons.Sync, label: 'Sync & Backup' },
+    { view: 'settings', icon: Icons.Settings, label: 'Settings' },
   ] as const;
 
   const renderView = () => {
@@ -74,6 +75,7 @@ const AppContent: React.FC = () => {
       case 'purchases': return <Purchases />;
       case 'rundown': return <Rundown />;
       case 'sync': return <Sync />;
+      case 'settings': return <Settings />;
       default: return <Dashboard />;
     }
   };
@@ -114,7 +116,7 @@ const AppContent: React.FC = () => {
 
       {/* Mobile Bottom Navigation */}
       <nav className="fixed bottom-0 left-0 right-0 bg-surface border-t border-secondary md:hidden flex justify-around">
-        {navItems.map(item => (
+        {navItems.slice(0, 5).map(item => ( // Show first 5 items on mobile
             <MobileNavItem 
                 key={item.view}
                 icon={item.icon}

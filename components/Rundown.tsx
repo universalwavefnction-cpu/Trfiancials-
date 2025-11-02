@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback } from 'react';
 import { useFinancials } from '../context/FinancialContext';
 import { getFinancialRundown } from '../services/geminiService';
@@ -40,7 +39,7 @@ const Rundown: React.FC = () => {
         setForecast('');
         try {
             const result = await getFinancialRundown(state, months);
-            if(result.includes("API key")) {
+            if(result.toLowerCase().includes("error") || result.toLowerCase().includes("api key")) {
                 setError(result);
             } else {
                 setForecast(result);
