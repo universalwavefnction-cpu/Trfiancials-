@@ -38,10 +38,6 @@ const initialState: FinancialData = {
     { id: 'a4', name: 'VWCE ETF', category: AssetCategory.StocksETFs, amountInvested: 800, currentValue: 950, date: '2023-08-20' },
   ],
   incomeGoals: months.map((m, i) => ({ id: `ig${i + 1}`, month: m, amount: incomeGoalAmounts[i] })),
-  expensePlans: [
-    ...months.map((m, i) => ({ id: `eps${i}`, month: m, mode: ExpensePlanMode.Survival, amount: 800 })),
-    ...months.map((m, i) => ({ id: `epg${i}`, month: m, mode: ExpensePlanMode.Growth, amount: 1500 })),
-  ],
   purchases: [
      {
         id: 'p1',
@@ -166,21 +162,6 @@ const financialReducer = (state: FinancialData, action: FinancialAction): Financ
         return {
             ...state,
             incomeGoals: [...state.incomeGoals, { id: `ig-${Date.now()}`, month, amount }],
-        }
-      }
-    }
-    case 'UPDATE_EXPENSE_PLAN': {
-      const { month, mode, amount } = action.payload;
-      const planExists = state.expensePlans.some(p => p.month === month && p.mode === mode);
-      if (planExists) {
-        return {
-          ...state,
-          expensePlans: state.expensePlans.map(p => (p.month === month && p.mode === mode) ? { ...p, amount } : p),
-        };
-      } else {
-        return {
-            ...state,
-            expensePlans: [...state.expensePlans, { id: `ep-${Date.now()}`, month, mode, amount }],
         }
       }
     }

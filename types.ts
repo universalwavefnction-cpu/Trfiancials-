@@ -41,13 +41,6 @@ export interface RecurringExpense {
   startDate: string; // YYYY-MM
 }
 
-export interface ExpensePlan {
-  id: string;
-  month: string; // YYYY-MM
-  mode: ExpensePlanMode;
-  amount: number;
-}
-
 export interface Debt {
   id: string;
   name: string;
@@ -121,7 +114,6 @@ export interface FinancialData {
   income: Income[];
   assets: Asset[];
   incomeGoals: IncomeGoal[];
-  expensePlans: ExpensePlan[];
   purchases: Purchase[];
 }
 
@@ -144,7 +136,6 @@ export type FinancialAction =
   | { type: "ADD_PURCHASE"; payload: Purchase }
   | { type: "UPDATE_PURCHASE_STATUS"; payload: { id: string; status: PurchaseStatus } }
   | { type: "UPDATE_INCOME_GOAL"; payload: { month: string; amount: number } }
-  | { type: "UPDATE_EXPENSE_PLAN"; payload: { month: string; mode: ExpensePlanMode; amount: number } }
   | { type: "UPDATE_DEBT_BALANCE"; payload: { id: string; newBalance: number } }
   | { type: "UPDATE_ASSET_VALUE"; payload: { id: string; newValue: number } };
 

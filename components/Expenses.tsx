@@ -254,19 +254,8 @@ const ExpenseTracker: React.FC = () => {
     const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
     const [isAddingRecurring, setIsAddingRecurring] = useState(false);
     const [editingRecurringExpense, setEditingRecurringExpense] = useState<RecurringExpense | null>(null);
-    const [plans, setPlans] = useState<{ [key: string]: string }>({});
 
     const months = useMemo(() => generateMonths(new Date(2025, 10, 1), 14), []);
-
-     useEffect(() => {
-        const initialPlans = state.expensePlans.reduce((acc, plan) => {
-            if(plan.mode === viewMode) {
-                acc[plan.month] = plan.amount.toString();
-            }
-            return acc;
-        }, {} as {[key: string]: string});
-        setPlans(initialPlans);
-    }, [state.expensePlans, viewMode]);
 
     const monthlyData = useMemo(() => {
         return months.map(m => {
@@ -274,26 +263,29 @@ const ExpenseTracker: React.FC = () => {
                 .filter(exp => exp.date.startsWith(m.key))
                 .reduce((sum, exp) => sum + exp.amount, 0);
             
-            const planned = state.expensePlans.find(p => p.month === m.key && p.mode === viewMode)?.amount || 0;
+            const planned = state.recurringExpenses
+                .filter(re => {
+                    const reStartDate = new Date(re.startDate + "-01T00:00:00Z");
+                    const monthDate = new Date(m.key + "-01T00:00:00Z");
+                    
+                    if (reStartDate > monthDate) return false;
+
+                    if (viewMode === ExpensePlanMode.Survival) {
+                        return re.mode === ExpenseMode.Survival || re.mode === ExpenseMode.Both;
+                    }
+                    if (viewMode === ExpensePlanMode.Growth) {
+                        return re.mode === ExpenseMode.Growth || re.mode === ExpenseMode.Both;
+                    }
+                    return false;
+                })
+                .reduce((sum, re) => sum + re.amount, 0);
+
             const variance = planned - actual; // Positive is under budget
             
             return { monthLabel: m.label, monthKey: m.key, Actual: actual, Planned: planned, Variance: variance };
         });
-    }, [months, state.expenses, state.expensePlans, viewMode]);
+    }, [months, state.expenses, state.recurringExpenses, viewMode]);
 
-    const handlePlanChange = (monthKey: string, amount: string) => {
-        setPlans(prev => ({ ...prev, [monthKey]: amount }));
-    };
-
-    const handleSavePlans = () => {
-        Object.entries(plans).forEach(([month, amountStr]) => {
-            const amount = parseFloat(amountStr);
-            if (!isNaN(amount)) {
-                dispatch({ type: 'UPDATE_EXPENSE_PLAN', payload: { month, amount, mode: viewMode } });
-            }
-        });
-        alert(`${viewMode} plans saved!`);
-    };
 
     const handleSaveExpense = (newExpenseData: Omit<Expense, 'id'>) => {
         const expenseToAdd: Expense = { id: `e-${Date.now()}`, ...newExpenseData };
@@ -372,65 +364,33 @@ const ExpenseTracker: React.FC = () => {
                 </CardContent>
             </Card>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                 <div>
-                    <Card>
-                        <CardHeader><CardTitle>Performance Details</CardTitle></CardHeader>
-                        <CardContent className="max-h-96 overflow-y-auto">
-                            <table className="w-full text-sm text-left">
-                                <thead className="text-xs text-text-secondary uppercase">
-                                    <tr>
-                                        <th className="py-3 px-4">Month</th>
-                                        <th className="py-3 px-4 text-right">Actual</th>
-                                        <th className="py-3 px-4 text-right">Planned</th>
-                                        <th className="py-3 px-4 text-right">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {monthlyData.map(d => (
-                                        <tr key={d.monthKey} className="border-t border-secondary">
-                                            <td className="py-3 px-4 font-medium">{d.monthLabel}</td>
-                                            <td className="py-3 px-4 text-right">{formatCurrency(d.Actual)}</td>
-                                            <td className="py-3 px-4 text-right">{formatCurrency(d.Planned)}</td>
-                                            <td className="py-3 px-4 text-right">
-                                                <button onClick={() => handleLogRecurring(d.monthKey)} className="text-xs bg-primary px-2 py-1 rounded hover:bg-accent hover:text-white">Log Recurring</button>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </CardContent>
-                    </Card>
-                 </div>
-                 <div className="space-y-6">
-                    <Card>
-                        <CardHeader>
-                            <div className="flex justify-between items-center">
-                                <CardTitle>Set Monthly Plan ({viewMode})</CardTitle>
-                                <button onClick={handleSavePlans} className="px-4 py-2 bg-accent text-white font-semibold rounded-lg hover:bg-accent-hover transition-colors text-sm">Save Plans</button>
-                            </div>
-                        </CardHeader>
-                        <CardContent className="space-y-3 max-h-96 overflow-y-auto">
-                            {months.map(m => (
-                                <div key={m.key} className="flex items-center space-x-3">
-                                    <label htmlFor={`plan-${m.key}`} className="w-24 text-sm text-text-secondary">{m.label}</label>
-                                    <div className="relative flex-1">
-                                         <span className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary">€</span>
-                                         <input
-                                            id={`plan-${m.key}`}
-                                            type="number"
-                                            placeholder="0"
-                                            value={plans[m.key] || ''}
-                                            onChange={(e) => handlePlanChange(m.key, e.target.value)}
-                                            className="w-full bg-background p-2 pl-6 rounded-md focus:outline-none focus:ring-2 focus:ring-brand border border-secondary"
-                                        />
-                                    </div>
-                                </div>
+            <Card>
+                <CardHeader><CardTitle>Performance Details</CardTitle></CardHeader>
+                <CardContent className="max-h-96 overflow-y-auto">
+                    <table className="w-full text-sm text-left">
+                        <thead className="text-xs text-text-secondary uppercase">
+                            <tr>
+                                <th className="py-3 px-4">Month</th>
+                                <th className="py-3 px-4 text-right">Actual</th>
+                                <th className="py-3 px-4 text-right">Planned</th>
+                                <th className="py-3 px-4 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {monthlyData.map(d => (
+                                <tr key={d.monthKey} className="border-t border-secondary">
+                                    <td className="py-3 px-4 font-medium">{d.monthLabel}</td>
+                                    <td className="py-3 px-4 text-right">{formatCurrency(d.Actual)}</td>
+                                    <td className="py-3 px-4 text-right">{formatCurrency(d.Planned)}</td>
+                                    <td className="py-3 px-4 text-right">
+                                        <button onClick={() => handleLogRecurring(d.monthKey)} className="text-xs bg-primary px-2 py-1 rounded hover:bg-accent hover:text-white">Log Recurring</button>
+                                    </td>
+                                </tr>
                             ))}
-                        </CardContent>
-                    </Card>
-                </div>
-            </div>
+                        </tbody>
+                    </table>
+                </CardContent>
+            </Card>
 
              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <Card>
