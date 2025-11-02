@@ -1,34 +1,35 @@
-
 import React, { createContext, useReducer, useContext, useEffect } from 'react';
-import { FinancialData, FinancialAction, Expense, Debt, Income, Asset, ExpenseCategory, ExpenseMode, IncomeSource, AssetCategory, RecurringExpense, Purchase, PurchaseStatus } from '../types';
+import { FinancialData, FinancialAction, Expense, Debt, Income, Asset, ExpenseCategory, ExpenseMode, IncomeSource, AssetCategory, RecurringExpense, Purchase, PurchaseStatus, ExpensePlanMode } from '../types';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 
 const months = [];
-let currentDate = new Date(2024, 10, 1); // Start from Nov 2024
+let currentDate = new Date(2025, 10, 1); // Start from Nov 2025
 for (let i = 0; i < 14; i++) {
     months.push(`${currentDate.getFullYear()}-${(currentDate.getMonth() + 1).toString().padStart(2, '0')}`);
     currentDate.setMonth(currentDate.getMonth() + 1);
 }
+const incomeGoalAmounts = [1500, 1800, 2000, 2200, 2500, 2800, 3000, 3200, 3500, 3800, 4000, 4200, 4500, 5000];
+
 
 const initialState: FinancialData = {
   expenses: [
-    { id: 'e1', date: '2024-11-05', category: ExpenseCategory.Housing, amount: 650, description: 'Rent', mode: ExpenseMode.Survival },
-    { id: 'e2', date: '2024-11-03', category: ExpenseCategory.Food, amount: 80, description: 'Groceries', mode: ExpenseMode.Survival },
-    { id: 'e3', date: '2024-11-10', category: ExpenseCategory.TrainingGym, amount: 50, description: 'Gym Membership', mode: ExpenseMode.Growth },
+    { id: 'e1', date: '2025-11-05', category: ExpenseCategory.Housing, amount: 650, description: 'Rent', mode: ExpenseMode.Both },
+    { id: 'e2', date: '2025-11-03', category: ExpenseCategory.Food, amount: 80, description: 'Groceries', mode: ExpenseMode.Survival },
+    { id: 'e3', date: '2025-11-10', category: ExpenseCategory.TrainingGym, amount: 50, description: 'Gym Membership', mode: ExpenseMode.Growth },
   ],
   recurringExpenses: [
-    { id: 're1', description: 'Rent', amount: 650, category: ExpenseCategory.Housing, mode: ExpenseMode.Survival, frequency: 'monthly', startDate: '2024-11' },
-    { id: 're2', description: 'Gym Membership', amount: 50, category: ExpenseCategory.TrainingGym, mode: ExpenseMode.Growth, frequency: 'monthly', startDate: '2024-11' },
-    { id: 're3', description: 'Phone Bill', amount: 30, category: ExpenseCategory.Personal, mode: ExpenseMode.Survival, frequency: 'monthly', startDate: '2024-11' },
+    { id: 're1', description: 'Rent', amount: 650, category: ExpenseCategory.Housing, mode: ExpenseMode.Both, frequency: 'monthly', startDate: '2025-11' },
+    { id: 're2', description: 'Gym Membership', amount: 50, category: ExpenseCategory.TrainingGym, mode: ExpenseMode.Growth, frequency: 'monthly', startDate: '2025-11' },
+    { id: 're3', description: 'Phone Bill', amount: 30, category: ExpenseCategory.Personal, mode: ExpenseMode.Survival, frequency: 'monthly', startDate: '2025-11' },
   ],
   debts: [
     { id: 'd1', name: 'Student Loan', originalAmount: 5000, currentBalance: 4800, interestRate: 5.5, minimumPayment: 100 },
     { id: 'd2', name: 'Credit Card', originalAmount: 2000, currentBalance: 1200, interestRate: 19.9, minimumPayment: 50 },
   ],
   income: [
-    { id: 'i1', date: '2024-11-15', source: IncomeSource.Consulting, amount: 1200, description: 'Project Alpha' },
-    { id: 'i2', date: '2024-11-28', source: IncomeSource.Newsletter, amount: 50, description: 'November Payout' },
-    { id: 'i3', date: '2024-12-15', source: IncomeSource.Consulting, amount: 1500, description: 'Project Bravo' },
+    { id: 'i1', date: '2025-11-15', source: IncomeSource.Consulting, amount: 1200, description: 'Project Alpha' },
+    { id: 'i2', date: '2025-11-28', source: IncomeSource.Newsletter, amount: 50, description: 'November Payout' },
+    { id: 'i3', date: '2025-12-15', source: IncomeSource.Consulting, amount: 1500, description: 'Project Bravo' },
   ],
   assets: [
     { id: 'a1', name: 'Emergency Fund', category: AssetCategory.EmergencyFund, amountInvested: 3000, currentValue: 3000, date: '2024-01-01' },
@@ -36,25 +37,10 @@ const initialState: FinancialData = {
     { id: 'a3', name: 'Bitcoin', category: AssetCategory.Crypto, amountInvested: 1000, currentValue: 1500, date: '2023-06-15' },
     { id: 'a4', name: 'VWCE ETF', category: AssetCategory.StocksETFs, amountInvested: 800, currentValue: 950, date: '2023-08-20' },
   ],
-  incomeGoals: [
-    { id: 'ig1', month: '2024-11', amount: 1500 },
-    { id: 'ig2', month: '2024-12', amount: 1800 },
-    { id: 'ig3', month: '2025-01', amount: 2000 },
-    { id: 'ig4', month: '2025-02', amount: 2200 },
-    { id: 'ig5', month: '2025-03', amount: 2500 },
-    { id: 'ig6', month: '2025-04', amount: 2800 },
-    { id: 'ig7', month: '2025-05', amount: 3000 },
-    { id: 'ig8', month: '2025-06', amount: 3200 },
-    { id: 'ig9', month: '2025-07', amount: 3500 },
-    { id: 'ig10', month: '2025-08', amount: 3800 },
-    { id: 'ig11', month: '2025-09', amount: 4000 },
-    { id: 'ig12', month: '2025-10', amount: 4200 },
-    { id: 'ig13', month: '2025-11', amount: 4500 },
-    { id: 'ig14', month: '2025-12', amount: 5000 },
-  ],
+  incomeGoals: months.map((m, i) => ({ id: `ig${i + 1}`, month: m, amount: incomeGoalAmounts[i] })),
   expensePlans: [
-    ...months.map((m, i) => ({ id: `eps${i}`, month: m, mode: ExpenseMode.Survival, amount: 800 })),
-    ...months.map((m, i) => ({ id: `epg${i}`, month: m, mode: ExpenseMode.Growth, amount: 1500 })),
+    ...months.map((m, i) => ({ id: `eps${i}`, month: m, mode: ExpensePlanMode.Survival, amount: 800 })),
+    ...months.map((m, i) => ({ id: `epg${i}`, month: m, mode: ExpensePlanMode.Growth, amount: 1500 })),
   ],
   purchases: [
      {
@@ -64,7 +50,7 @@ const initialState: FinancialData = {
         category: ExpenseCategory.BusinessExpenses,
         justification: 'Improve ergonomics and productivity.',
         status: PurchaseStatus.Considering,
-        dateAdded: '2024-11-10',
+        dateAdded: '2025-11-10',
     }
   ],
 };
@@ -122,6 +108,11 @@ const financialReducer = (state: FinancialData, action: FinancialAction): Financ
         };
     case 'ADD_RECURRING_EXPENSE':
         return { ...state, recurringExpenses: [...state.recurringExpenses, action.payload] };
+    case 'UPDATE_RECURRING_EXPENSE':
+        return {
+            ...state,
+            recurringExpenses: state.recurringExpenses.map(re => re.id === action.payload.id ? action.payload : re),
+        };
     case 'DELETE_RECURRING_EXPENSE':
         return { ...state, recurringExpenses: state.recurringExpenses.filter(re => re.id !== action.payload.id) };
     case 'LOG_RECURRING_EXPENSES_FOR_MONTH': {
@@ -180,6 +171,7 @@ const financialReducer = (state: FinancialData, action: FinancialAction): Financ
     case 'UPDATE_ASSET_VALUE':
       return {
         ...state,
+        // FIX: The variable in the map is 'a', not 'd'. Changed 'd' to 'a'.
         assets: state.assets.map(a => a.id === action.payload.id ? { ...a, currentValue: action.payload.newValue } : a),
       };
     default:

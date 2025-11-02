@@ -1,5 +1,4 @@
-
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { useFinancials } from '../context/FinancialContext';
 import { Income, IncomeSource } from '../types';
 import { Card, CardHeader, CardTitle, CardContent } from './ui/Card';
@@ -19,6 +18,47 @@ const generateMonths = (startDate: Date, count: number) => {
         currentDate.setMonth(currentDate.getMonth() + 1);
     }
     return months;
+};
+
+const ActionMenu: React.FC<{ income: Income, onEdit: (income: Income) => void, onDelete: (id: string) => void }> = ({ income, onEdit, onDelete }) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const menuRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+                setIsOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
+
+    return (
+        <div className="relative" ref={menuRef}>
+            <button onClick={() => setIsOpen(p => !p)} className="p-1 rounded-full text-text-secondary hover:bg-surface focus:outline-none focus:ring-2 focus:ring-brand">
+                <Icons.More className="w-5 h-5" />
+            </button>
+            {isOpen && (
+                <div className="absolute right-0 mt-2 w-32 bg-surface rounded-md shadow-lg z-10 border border-secondary animate-fade-in">
+                    <button
+                        onClick={() => { onEdit(income); setIsOpen(false); }}
+                        className="w-full text-left px-4 py-2 text-sm text-text-primary hover:bg-primary flex items-center"
+                    >
+                        <Icons.Edit className="w-4 h-4 mr-2" /> Edit
+                    </button>
+                    <button
+                        onClick={() => { onDelete(income.id); setIsOpen(false); }}
+                        className="w-full text-left px-4 py-2 text-sm text-danger hover:bg-danger/10 flex items-center"
+                    >
+                        <Icons.Trash className="w-4 h-4 mr-2" /> Delete
+                    </button>
+                </div>
+            )}
+        </div>
+    );
 };
 
 interface IncomeFormProps {
@@ -95,7 +135,7 @@ const IncomeTracker: React.FC = () => {
     const [editingIncome, setEditingIncome] = useState<Income | null>(null);
     const [goals, setGoals] = useState<{ [key: string]: string }>({});
 
-    const months = useMemo(() => generateMonths(new Date(2024, 10, 1), 14), []); // Nov 2024 for 14 months
+    const months = useMemo(() => generateMonths(new Date(2025, 10, 1), 14), []); // Nov 2025 for 14 months
 
     useEffect(() => {
         const initialGoals = state.incomeGoals.reduce((acc, goal) => {
@@ -247,17 +287,14 @@ const IncomeTracker: React.FC = () => {
                             
                             <div className="space-y-1 max-h-60 overflow-y-auto">
                                 {state.income.slice().sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).map(inc => (
-                                    <div key={inc.id} className="flex justify-between items-center p-2 rounded-lg hover:bg-primary group">
+                                    <div key={inc.id} className="flex justify-between items-center p-2 rounded-lg hover:bg-primary">
                                         <div>
                                             <p className="font-semibold">{inc.description}</p>
                                             <p className="text-sm text-text-secondary">{inc.source} &bull; {new Date(inc.date).toLocaleDateString()}</p>
                                         </div>
-                                        <div className="flex items-center space-x-2">
+                                        <div className="flex items-center space-x-4">
                                             <p className="font-bold text-success">{formatCurrency(inc.amount)}</p>
-                                            <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center space-x-1">
-                                                <button onClick={() => handleStartEditing(inc)} className="p-1 rounded-full text-text-secondary hover:text-brand hover:bg-surface"><Icons.Edit className="w-4 h-4" /></button>
-                                                <button onClick={() => handleDeleteIncome(inc.id)} className="p-1 rounded-full text-text-secondary hover:text-danger hover:bg-surface"><Icons.Trash className="w-4 h-4" /></button>
-                                            </div>
+                                            <ActionMenu income={inc} onEdit={handleStartEditing} onDelete={handleDeleteIncome} />
                                         </div>
                                     </div>
                                 ))}

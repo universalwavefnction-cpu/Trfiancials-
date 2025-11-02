@@ -1,7 +1,6 @@
-
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useFinancials } from '../context/FinancialContext';
-import { Expense, ExpenseCategory, ExpenseMode, RecurringExpense } from '../types';
+import { Expense, ExpenseCategory, ExpenseMode, RecurringExpense, ExpensePlanMode } from '../types';
 import { Card, CardHeader, CardTitle, CardContent } from './ui/Card';
 import { Icons } from './ui/Icons';
 import { ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
@@ -19,6 +18,88 @@ const generateMonths = (startDate: Date, count: number) => {
         currentDate.setMonth(currentDate.getMonth() + 1);
     }
     return months;
+};
+
+const ActionMenu: React.FC<{ expense: Expense, onEdit: (expense: Expense) => void, onDelete: (id: string) => void }> = ({ expense, onEdit, onDelete }) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const menuRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+                setIsOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
+
+    return (
+        <div className="relative" ref={menuRef}>
+            <button onClick={() => setIsOpen(p => !p)} className="p-1 rounded-full text-text-secondary hover:bg-surface focus:outline-none focus:ring-2 focus:ring-brand">
+                <Icons.More className="w-5 h-5" />
+            </button>
+            {isOpen && (
+                <div className="absolute right-0 mt-2 w-32 bg-surface rounded-md shadow-lg z-10 border border-secondary animate-fade-in">
+                    <button
+                        onClick={() => { onEdit(expense); setIsOpen(false); }}
+                        className="w-full text-left px-4 py-2 text-sm text-text-primary hover:bg-primary flex items-center"
+                    >
+                        <Icons.Edit className="w-4 h-4 mr-2" /> Edit
+                    </button>
+                    <button
+                        onClick={() => { onDelete(expense.id); setIsOpen(false); }}
+                        className="w-full text-left px-4 py-2 text-sm text-danger hover:bg-danger/10 flex items-center"
+                    >
+                        <Icons.Trash className="w-4 h-4 mr-2" /> Delete
+                    </button>
+                </div>
+            )}
+        </div>
+    );
+};
+
+const RecurringActionMenu: React.FC<{ expense: RecurringExpense, onEdit: (expense: RecurringExpense) => void, onDelete: (id: string) => void }> = ({ expense, onEdit, onDelete }) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const menuRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+                setIsOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
+
+    return (
+        <div className="relative" ref={menuRef}>
+            <button onClick={() => setIsOpen(p => !p)} className="p-1 rounded-full text-text-secondary hover:bg-surface focus:outline-none focus:ring-2 focus:ring-brand">
+                <Icons.More className="w-5 h-5" />
+            </button>
+            {isOpen && (
+                <div className="absolute right-0 mt-2 w-32 bg-surface rounded-md shadow-lg z-10 border border-secondary animate-fade-in">
+                    <button
+                        onClick={() => { onEdit(expense); setIsOpen(false); }}
+                        className="w-full text-left px-4 py-2 text-sm text-text-primary hover:bg-primary flex items-center"
+                    >
+                        <Icons.Edit className="w-4 h-4 mr-2" /> Edit
+                    </button>
+                    <button
+                        onClick={() => { onDelete(expense.id); setIsOpen(false); }}
+                        className="w-full text-left px-4 py-2 text-sm text-danger hover:bg-danger/10 flex items-center"
+                    >
+                        <Icons.Trash className="w-4 h-4 mr-2" /> Delete
+                    </button>
+                </div>
+            )}
+        </div>
+    );
 };
 
 interface ExpenseFormProps {
@@ -89,16 +170,24 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ onSave, onUpdate, onCancel, i
     );
 };
 
-const AddRecurringExpenseForm: React.FC<{ onSave: (expense: Omit<RecurringExpense, 'id'>) => void; onCancel: () => void }> = ({ onSave, onCancel }) => {
-    const [description, setDescription] = useState('');
-    const [amount, setAmount] = useState('');
-    const [category, setCategory] = useState<ExpenseCategory>(ExpenseCategory.Housing);
-    const [mode, setMode] = useState<ExpenseMode>(ExpenseMode.Survival);
-    const [startDate, setStartDate] = useState(new Date().toISOString().slice(0, 7)); // YYYY-MM
+interface RecurringExpenseFormProps {
+    onSave?: (expense: Omit<RecurringExpense, 'id'>) => void;
+    onUpdate?: (expense: RecurringExpense) => void;
+    onCancel: () => void;
+    initialData?: RecurringExpense | null;
+}
+
+const RecurringExpenseForm: React.FC<RecurringExpenseFormProps> = ({ onSave, onUpdate, onCancel, initialData }) => {
+    const isEditMode = !!initialData;
+    const [description, setDescription] = useState(initialData?.description || '');
+    const [amount, setAmount] = useState(initialData?.amount.toString() || '');
+    const [category, setCategory] = useState<ExpenseCategory>(initialData?.category || ExpenseCategory.Housing);
+    const [mode, setMode] = useState<ExpenseMode>(initialData?.mode || ExpenseMode.Survival);
+    const [startDate, setStartDate] = useState(initialData?.startDate || new Date().toISOString().slice(0, 7));
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        const newExpense: Omit<RecurringExpense, 'id'> = {
+        const expenseData: Omit<RecurringExpense, 'id'> = {
             description,
             amount: parseFloat(amount),
             category,
@@ -106,8 +195,12 @@ const AddRecurringExpenseForm: React.FC<{ onSave: (expense: Omit<RecurringExpens
             frequency: 'monthly',
             startDate,
         };
-        if (description && !isNaN(newExpense.amount)) {
-            onSave(newExpense);
+        if (description && !isNaN(expenseData.amount)) {
+            if (isEditMode && onUpdate && initialData) {
+                onUpdate({ ...expenseData, id: initialData.id });
+            } else if (!isEditMode && onSave) {
+                onSave(expenseData);
+            }
         } else {
             alert("Please fill all fields with valid data.");
         }
@@ -116,6 +209,7 @@ const AddRecurringExpenseForm: React.FC<{ onSave: (expense: Omit<RecurringExpens
     return (
          <Card className="my-4 animate-fade-in">
             <CardContent className="pt-6">
+                <h3 className="text-lg font-semibold mb-4 text-text-primary">{isEditMode ? 'Edit Recurring Expense' : 'Add Recurring Expense'}</h3>
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div className="space-y-2">
                         <label className="text-sm font-medium text-text-secondary">Description</label>
@@ -138,7 +232,6 @@ const AddRecurringExpenseForm: React.FC<{ onSave: (expense: Omit<RecurringExpens
                         </div>
                          <div className="space-y-2">
                             <label className="text-sm font-medium text-text-secondary">Mode</label>
-                            {/* FIX: Explicitly type the event to ensure e.target.value is inferred as a string. */}
                             <select value={mode} onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setMode(e.target.value as ExpenseMode)} className="w-full bg-background p-2 rounded-md border border-secondary">
                                 {Object.values(ExpenseMode).map(s => <option key={s} value={s}>{s}</option>)}
                             </select>
@@ -146,7 +239,7 @@ const AddRecurringExpenseForm: React.FC<{ onSave: (expense: Omit<RecurringExpens
                     </div>
                     <div className="flex justify-end space-x-3 pt-2">
                         <button type="button" onClick={onCancel} className="px-4 py-2 bg-primary rounded-lg">Cancel</button>
-                        <button type="submit" className="px-4 py-2 bg-accent rounded-lg text-white">Save Recurring</button>
+                        <button type="submit" className="px-4 py-2 bg-accent rounded-lg text-white font-semibold">{isEditMode ? 'Save Changes' : 'Save Recurring'}</button>
                     </div>
                 </form>
             </CardContent>
@@ -156,13 +249,14 @@ const AddRecurringExpenseForm: React.FC<{ onSave: (expense: Omit<RecurringExpens
 
 const ExpenseTracker: React.FC = () => {
     const { state, dispatch } = useFinancials();
-    const [viewMode, setViewMode] = useState<ExpenseMode>(ExpenseMode.Growth);
+    const [viewMode, setViewMode] = useState<ExpensePlanMode>(ExpensePlanMode.Growth);
     const [isAdding, setIsAdding] = useState(false);
     const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
     const [isAddingRecurring, setIsAddingRecurring] = useState(false);
+    const [editingRecurringExpense, setEditingRecurringExpense] = useState<RecurringExpense | null>(null);
     const [plans, setPlans] = useState<{ [key: string]: string }>({});
 
-    const months = useMemo(() => generateMonths(new Date(2024, 10, 1), 14), []);
+    const months = useMemo(() => generateMonths(new Date(2025, 10, 1), 14), []);
 
      useEffect(() => {
         const initialPlans = state.expensePlans.reduce((acc, plan) => {
@@ -228,11 +322,21 @@ const ExpenseTracker: React.FC = () => {
         setIsAddingRecurring(false);
     }
     
+    const handleUpdateRecurringExpense = (updatedExpense: RecurringExpense) => {
+        dispatch({ type: 'UPDATE_RECURRING_EXPENSE', payload: updatedExpense });
+        setEditingRecurringExpense(null);
+    };
+
     const handleDeleteRecurring = (id: string) => {
         if(window.confirm("Are you sure you want to delete this recurring expense?")) {
             dispatch({ type: 'DELETE_RECURRING_EXPENSE', payload: { id } });
         }
     }
+
+    const handleStartEditingRecurring = (expense: RecurringExpense) => {
+        setIsAddingRecurring(false);
+        setEditingRecurringExpense(expense);
+    };
     
     const handleLogRecurring = (monthKey: string) => {
         dispatch({ type: 'LOG_RECURRING_EXPENSES_FOR_MONTH', payload: { month: monthKey } });
@@ -246,8 +350,8 @@ const ExpenseTracker: React.FC = () => {
                     <p className="text-text-secondary mt-1">Plan vs. Actual spending for your 14-month horizon.</p>
                 </div>
                  <div className="flex space-x-2 p-1 bg-primary rounded-lg border border-secondary">
-                    <button onClick={() => setViewMode(ExpenseMode.Survival)} className={`px-3 py-1 text-sm font-semibold rounded-md ${viewMode === ExpenseMode.Survival ? 'bg-accent text-white' : 'text-text-secondary'}`}>Survival</button>
-                    <button onClick={() => setViewMode(ExpenseMode.Growth)} className={`px-3 py-1 text-sm font-semibold rounded-md ${viewMode === ExpenseMode.Growth ? 'bg-accent text-white' : 'text-text-secondary'}`}>Growth</button>
+                    <button onClick={() => setViewMode(ExpensePlanMode.Survival)} className={`px-3 py-1 text-sm font-semibold rounded-md ${viewMode === ExpensePlanMode.Survival ? 'bg-accent text-white' : 'text-text-secondary'}`}>Survival</button>
+                    <button onClick={() => setViewMode(ExpensePlanMode.Growth)} className={`px-3 py-1 text-sm font-semibold rounded-md ${viewMode === ExpensePlanMode.Growth ? 'bg-accent text-white' : 'text-text-secondary'}`}>Growth</button>
                 </div>
             </div>
             
@@ -333,7 +437,7 @@ const ExpenseTracker: React.FC = () => {
                     <CardHeader>
                         <div className="flex justify-between items-center">
                             <CardTitle>Recurring Expenses</CardTitle>
-                             {!isAddingRecurring && (
+                             {!(isAddingRecurring || editingRecurringExpense) && (
                                 <button onClick={() => setIsAddingRecurring(true)} className="flex items-center space-x-2 px-3 py-2 bg-accent text-white font-semibold rounded-lg hover:bg-accent-hover transition-colors text-sm">
                                     <Icons.Plus className="w-4 h-4" />
                                     <span>Add Recurring</span>
@@ -342,7 +446,14 @@ const ExpenseTracker: React.FC = () => {
                         </div>
                     </CardHeader>
                     <CardContent>
-                        {isAddingRecurring && <AddRecurringExpenseForm onSave={handleSaveRecurringExpense} onCancel={() => setIsAddingRecurring(false)} />}
+                        {(isAddingRecurring || editingRecurringExpense) && (
+                            <RecurringExpenseForm 
+                                onSave={handleSaveRecurringExpense}
+                                onUpdate={handleUpdateRecurringExpense}
+                                onCancel={() => { setIsAddingRecurring(false); setEditingRecurringExpense(null); }}
+                                initialData={editingRecurringExpense}
+                            />
+                        )}
                         <div className="space-y-2 max-h-60 overflow-y-auto">
                             {state.recurringExpenses.map(re => (
                                 <div key={re.id} className="flex justify-between items-center p-2 rounded-lg hover:bg-primary">
@@ -352,7 +463,7 @@ const ExpenseTracker: React.FC = () => {
                                     </div>
                                     <div className="flex items-center space-x-4">
                                         <p className="font-bold">{formatCurrency(re.amount)}/mo</p>
-                                        <button onClick={() => handleDeleteRecurring(re.id)} className="text-text-secondary hover:text-danger"><Icons.Trash className="w-4 h-4" /></button>
+                                        <RecurringActionMenu expense={re} onEdit={handleStartEditingRecurring} onDelete={handleDeleteRecurring} />
                                     </div>
                                 </div>
                             ))}
@@ -378,17 +489,14 @@ const ExpenseTracker: React.FC = () => {
 
                         <div className="space-y-1 max-h-60 overflow-y-auto">
                             {state.expenses.slice().sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).map(exp => (
-                                <div key={exp.id} className="flex justify-between items-center p-2 rounded-lg hover:bg-primary group">
+                                <div key={exp.id} className="flex justify-between items-center p-2 rounded-lg hover:bg-primary">
                                     <div>
                                         <p className="font-semibold">{exp.description}</p>
                                         <p className="text-sm text-text-secondary">{exp.category} &bull; {new Date(exp.date).toLocaleDateString()}</p>
                                     </div>
-                                    <div className="flex items-center space-x-2">
+                                    <div className="flex items-center space-x-4">
                                         <p className="font-bold text-danger">{formatCurrency(exp.amount)}</p>
-                                        <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center space-x-1">
-                                            <button onClick={() => handleStartEditing(exp)} className="p-1 rounded-full text-text-secondary hover:text-brand hover:bg-surface"><Icons.Edit className="w-4 h-4" /></button>
-                                            <button onClick={() => handleDeleteExpense(exp.id)} className="p-1 rounded-full text-text-secondary hover:text-danger hover:bg-surface"><Icons.Trash className="w-4 h-4" /></button>
-                                        </div>
+                                        <ActionMenu expense={exp} onEdit={handleStartEditing} onDelete={handleDeleteExpense} />
                                     </div>
                                 </div>
                             ))}

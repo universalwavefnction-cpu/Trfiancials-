@@ -14,6 +14,12 @@ export enum ExpenseCategory {
 export enum ExpenseMode {
   Survival = "Survival Mode",
   Growth = "Growth Mode",
+  Both = "Survival & Growth",
+}
+
+export enum ExpensePlanMode {
+  Survival = "Survival Mode",
+  Growth = "Growth Mode",
 }
 
 export interface Expense {
@@ -38,7 +44,7 @@ export interface RecurringExpense {
 export interface ExpensePlan {
   id: string;
   month: string; // YYYY-MM
-  mode: ExpenseMode;
+  mode: ExpensePlanMode;
   amount: number;
 }
 
@@ -125,6 +131,7 @@ export type FinancialAction =
   | { type: "UPDATE_EXPENSE"; payload: Expense }
   | { type: "DELETE_EXPENSE"; payload: { id: string } }
   | { type: "ADD_RECURRING_EXPENSE"; payload: RecurringExpense }
+  | { type: "UPDATE_RECURRING_EXPENSE"; payload: RecurringExpense }
   | { type: "DELETE_RECURRING_EXPENSE"; payload: { id: string } }
   | { type: "LOG_RECURRING_EXPENSES_FOR_MONTH"; payload: { month: string } }
   | { type: "ADD_DEBT"; payload: Debt }
@@ -137,7 +144,7 @@ export type FinancialAction =
   | { type: "ADD_PURCHASE"; payload: Purchase }
   | { type: "UPDATE_PURCHASE_STATUS"; payload: { id: string; status: PurchaseStatus } }
   | { type: "UPDATE_INCOME_GOAL"; payload: { month: string; amount: number } }
-  | { type: "UPDATE_EXPENSE_PLAN"; payload: { month: string; mode: ExpenseMode; amount: number } }
+  | { type: "UPDATE_EXPENSE_PLAN"; payload: { month: string; mode: ExpensePlanMode; amount: number } }
   | { type: "UPDATE_DEBT_BALANCE"; payload: { id: string; newBalance: number } }
   | { type: "UPDATE_ASSET_VALUE"; payload: { id: string; newValue: number } };
 

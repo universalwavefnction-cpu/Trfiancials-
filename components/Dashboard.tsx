@@ -1,4 +1,3 @@
-
 import React, { useMemo, useState, useCallback } from 'react';
 import { useFinancials } from '../context/FinancialContext';
 import { Card, CardHeader, CardTitle, CardContent } from './ui/Card';
@@ -77,7 +76,7 @@ const MonthlySummary: React.FC = () => {
         // In a live app, this would be the current month:
         // const now = new Date();
         // const currentMonthKey = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}`;
-        const currentMonthKey = '2024-11'; 
+        const currentMonthKey = '2025-11'; 
 
         const income = state.income
             .filter(i => i.date.startsWith(currentMonthKey))
@@ -94,7 +93,7 @@ const MonthlySummary: React.FC = () => {
     return (
         <Card>
             <CardHeader>
-                <CardTitle>This Month's Balance (Nov 2024)</CardTitle>
+                <CardTitle>This Month's Balance (Nov 2025)</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
                  <div className="flex justify-between items-center">
@@ -130,7 +129,7 @@ const PlannedPurchases: React.FC = () => {
         const planned = state.purchases.filter(p => p.status === PurchaseStatus.Considering);
         const totalCost = planned.reduce((sum, p) => sum + p.cost, 0);
 
-        const currentMonthKey = '2024-11'; // Using fixed month for consistency with mock data
+        const currentMonthKey = '2025-11'; // Using fixed month for consistency with mock data
         const income = state.income.filter(i => i.date.startsWith(currentMonthKey)).reduce((sum, i) => sum + i.amount, 0);
         const expenses = state.expenses.filter(e => e.date.startsWith(currentMonthKey)).reduce((sum, e) => sum + e.amount, 0);
         const netFlow = income - expenses;
@@ -207,9 +206,13 @@ const InsightsEngine: React.FC = () => {
                 Assets: ${state.assets.length} assets, total value ${state.assets.reduce((s, a) => s + a.currentValue, 0)} EUR.
             `;
             const result = await getFinancialInsights(financialSummary);
-            setInsight(result);
+            if (result.includes("Could not") || result.includes("unexpected error")) {
+                setError(result);
+            } else {
+                setInsight(result);
+            }
         } catch (err) {
-            setError('Could not fetch insights. Please check API key.');
+            setError('An unknown error occurred while fetching insights.');
             console.error(err);
         }
         setIsLoading(false);
@@ -223,7 +226,7 @@ const InsightsEngine: React.FC = () => {
             </CardHeader>
             <CardContent>
                 {isLoading && <p className="text-text-secondary animate-pulse">Generating insight...</p>}
-                {error && <p className="text-danger text-sm">{error}</p>}
+                {error && <p className="text-text-secondary text-sm">{error}</p>}
                 {insight && <p className="text-text-secondary italic">"{insight}"</p>}
                 {!isLoading && !insight && !error && <p className="text-text-secondary">Click the button to generate an AI-powered insight based on your current data.</p>}
                 <button 
@@ -272,7 +275,7 @@ const RundownEngine: React.FC = () => {
         setForecast('');
         try {
             const result = await getFinancialRundown(state, months);
-            if(result.includes("API key")) {
+            if(result.includes("Could not") || result.includes("unexpected error")) {
                 setError(result);
             } else {
                 setForecast(result);

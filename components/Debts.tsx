@@ -1,11 +1,51 @@
-
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { useFinancials } from '../context/FinancialContext';
 import { Debt } from '../types';
 import { Card, CardHeader, CardTitle, CardContent } from './ui/Card';
 import { Icons } from './ui/Icons';
 
 const formatCurrency = (value: number) => `€${value.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+const ActionMenu: React.FC<{ debt: Debt, onEdit: (debt: Debt) => void, onDelete: (id: string) => void }> = ({ debt, onEdit, onDelete }) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const menuRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+                setIsOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
+
+    return (
+        <div className="relative" ref={menuRef}>
+            <button onClick={() => setIsOpen(p => !p)} className="p-1 rounded-full text-text-secondary hover:bg-surface focus:outline-none focus:ring-2 focus:ring-brand">
+                <Icons.More className="w-5 h-5" />
+            </button>
+            {isOpen && (
+                <div className="absolute right-0 mt-2 w-32 bg-surface rounded-md shadow-lg z-10 border border-secondary animate-fade-in">
+                    <button
+                        onClick={() => { onEdit(debt); setIsOpen(false); }}
+                        className="w-full text-left px-4 py-2 text-sm text-text-primary hover:bg-primary flex items-center"
+                    >
+                        <Icons.Edit className="w-4 h-4 mr-2" /> Edit
+                    </button>
+                    <button
+                        onClick={() => { onDelete(debt.id); setIsOpen(false); }}
+                        className="w-full text-left px-4 py-2 text-sm text-danger hover:bg-danger/10 flex items-center"
+                    >
+                        <Icons.Trash className="w-4 h-4 mr-2" /> Delete
+                    </button>
+                </div>
+            )}
+        </div>
+    );
+};
 
 interface DebtFormProps {
     onSave?: (debt: Omit<Debt, 'id'>) => void;
@@ -203,18 +243,15 @@ const DebtDashboard: React.FC = () => {
                     {state.debts.sort((a,b) => b.interestRate - a.interestRate).map(debt => {
                         const progress = (1 - debt.currentBalance / debt.originalAmount) * 100;
                         return (
-                            <Card key={debt.id} className="hover:shadow-brand/10 transition-shadow group">
+                            <Card key={debt.id} className="hover:shadow-brand/10 transition-shadow">
                                 <CardHeader>
                                     <div className="flex justify-between items-center">
                                         <CardTitle>{debt.name}</CardTitle>
-                                        <div className="flex items-center space-x-2">
+                                        <div className="flex items-center space-x-4">
                                             <span className={`text-sm font-bold px-2 py-1 rounded-full ${debt.interestRate > 15 ? 'bg-danger/20 text-danger' : 'bg-warning/20 text-warning'}`}>
                                                 {debt.interestRate.toFixed(1)}% APR
                                             </span>
-                                            <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center space-x-1">
-                                                <button onClick={() => handleStartEditing(debt)} className="p-1 rounded-full text-text-secondary hover:text-brand hover:bg-surface"><Icons.Edit className="w-4 h-4" /></button>
-                                                <button onClick={() => handleDeleteDebt(debt.id)} className="p-1 rounded-full text-text-secondary hover:text-danger hover:bg-surface"><Icons.Trash className="w-4 h-4" /></button>
-                                            </div>
+                                            <ActionMenu debt={debt} onEdit={handleStartEditing} onDelete={handleDeleteDebt} />
                                         </div>
                                     </div>
                                 </CardHeader>
