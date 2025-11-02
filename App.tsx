@@ -10,6 +10,7 @@ import Income from './components/Income';
 import Investments from './components/Investments';
 import Purchases from './components/Purchases';
 import Sync from './components/Sync';
+import Rundown from './components/Rundown';
 
 const NavItem: React.FC<{
   icon: React.ElementType;
@@ -59,6 +60,7 @@ const AppContent: React.FC = () => {
     { view: 'income', icon: Icons.Income, label: 'Income' },
     { view: 'investments', icon: Icons.Investments, label: 'Investments' },
     { view: 'purchases', icon: Icons.Purchases, label: 'Purchases' },
+    { view: 'rundown', icon: Icons.Rundown, label: 'Rundown' },
     { view: 'sync', icon: Icons.Sync, label: 'Sync & Backup' },
   ] as const;
 
@@ -70,6 +72,7 @@ const AppContent: React.FC = () => {
       case 'income': return <Income />;
       case 'investments': return <Investments />;
       case 'purchases': return <Purchases />;
+      case 'rundown': return <Rundown />;
       case 'sync': return <Sync />;
       default: return <Dashboard />;
     }
@@ -78,10 +81,10 @@ const AppContent: React.FC = () => {
   return (
     <div className="flex h-screen bg-background text-text-primary">
       {/* Desktop Sidebar */}
-      <aside className="hidden md:flex flex-col w-64 bg-surface flex-shrink-0">
-        <div className="flex items-center justify-center h-20 border-b border-primary">
+      <aside className="hidden md:flex flex-col w-64 bg-surface flex-shrink-0 border-r border-primary/50">
+        <div className="flex items-center justify-center h-20 border-b border-primary/50">
           <Icons.Goal className="w-8 h-8 text-accent" />
-          <span className="ml-2 text-xl font-bold">Zenith</span>
+          <span className="ml-2 text-xl font-bold">WaveFinances</span>
         </div>
         <nav className="flex-1 px-4 py-6 space-y-2">
             {navItems.map(item => (
@@ -98,10 +101,10 @@ const AppContent: React.FC = () => {
 
       {/* Main Content */}
       <main className="flex-1 flex flex-col overflow-hidden pb-16 md:pb-0">
-        <header className="flex items-center justify-between p-4 bg-surface shadow-md md:hidden">
+        <header className="flex items-center justify-between p-4 bg-surface shadow-sm md:hidden border-b border-primary/50">
           <div className="flex items-center">
             <Icons.Goal className="w-7 h-7 text-accent" />
-            <span className="ml-2 text-lg font-bold">Zenith</span>
+            <span className="ml-2 text-lg font-bold">WaveFinances</span>
           </div>
         </header>
         <div className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
@@ -110,7 +113,7 @@ const AppContent: React.FC = () => {
       </main>
 
       {/* Mobile Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-surface border-t border-primary md:hidden flex justify-around">
+      <nav className="fixed bottom-0 left-0 right-0 bg-surface border-t border-primary/50 md:hidden flex justify-around">
         {navItems.map(item => (
             <MobileNavItem 
                 key={item.view}

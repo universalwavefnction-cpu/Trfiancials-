@@ -1,3 +1,4 @@
+
 import React, { useCallback } from 'react';
 import { useFinancials } from '../context/FinancialContext';
 import { Card, CardHeader, CardTitle, CardContent } from './ui/Card';
@@ -9,7 +10,7 @@ const Sync: React.FC = () => {
     const handleExport = useCallback(() => {
         const dataStr = JSON.stringify(state, null, 2);
         const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
-        const exportFileDefaultName = 'zenith_finance_backup.json';
+        const exportFileDefaultName = 'wavefinances_backup.json';
         const linkElement = document.createElement('a');
         linkElement.setAttribute('href', dataUri);
         linkElement.setAttribute('download', exportFileDefaultName);
@@ -55,7 +56,7 @@ const Sync: React.FC = () => {
                 </CardHeader>
                 <CardContent className="space-y-3 text-text-secondary">
                     <p>
-                        <strong>Zenith Finance Tracker is built for privacy.</strong> All of your financial data is stored
+                        <strong>Universal WaveFinances is built for privacy.</strong> All of your financial data is stored
                         exclusively on your current device and in your browser's local storage.
                     </p>
                     <p>
@@ -102,7 +103,7 @@ const Sync: React.FC = () => {
                         <p className="text-text-secondary mb-4">
                             Select the <code>.json</code> file you exported from another device. This will replace all data on this device.
                         </p>
-                         <label className="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-primary text-text-primary font-semibold rounded-lg hover:bg-secondary transition-colors cursor-pointer">
+                         <label className="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-primary text-text-primary font-semibold rounded-lg hover:bg-primary/80 transition-colors cursor-pointer">
                             <Icons.Upload className="w-5 h-5" />
                             <span>Import Data (.json)</span>
                             <input type="file" accept=".json" className="hidden" onChange={handleImport} />

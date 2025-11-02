@@ -58,7 +58,7 @@ const DebtForm: React.FC<DebtFormProps> = ({ onSave, onUpdate, onCancel, initial
                             placeholder="e.g., Car Loan"
                             value={name}
                             onChange={(e) => setName(e.target.value)}
-                            className="w-full bg-primary p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-accent"
+                            className="w-full bg-primary/50 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-accent border border-primary"
                             required
                         />
                     </div>
@@ -71,7 +71,7 @@ const DebtForm: React.FC<DebtFormProps> = ({ onSave, onUpdate, onCancel, initial
                                 placeholder="5000"
                                 value={originalAmount}
                                 onChange={(e) => setOriginalAmount(e.target.value)}
-                                className="w-full bg-primary p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-accent"
+                                className="w-full bg-primary/50 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-accent border border-primary"
                                 required
                             />
                         </div>
@@ -83,7 +83,7 @@ const DebtForm: React.FC<DebtFormProps> = ({ onSave, onUpdate, onCancel, initial
                                 placeholder="4800"
                                 value={currentBalance}
                                 onChange={(e) => setCurrentBalance(e.target.value)}
-                                className="w-full bg-primary p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-accent"
+                                className="w-full bg-primary/50 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-accent border border-primary"
                                 required
                             />
                         </div>
@@ -96,7 +96,7 @@ const DebtForm: React.FC<DebtFormProps> = ({ onSave, onUpdate, onCancel, initial
                                 placeholder="5.5"
                                 value={interestRate}
                                 onChange={(e) => setInterestRate(e.target.value)}
-                                className="w-full bg-primary p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-accent"
+                                className="w-full bg-primary/50 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-accent border border-primary"
                                 required
                             />
                         </div>
@@ -108,13 +108,13 @@ const DebtForm: React.FC<DebtFormProps> = ({ onSave, onUpdate, onCancel, initial
                                 placeholder="100"
                                 value={minimumPayment}
                                 onChange={(e) => setMinimumPayment(e.target.value)}
-                                className="w-full bg-primary p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-accent"
+                                className="w-full bg-primary/50 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-accent border border-primary"
                                 required
                             />
                         </div>
                     </div>
                     <div className="flex justify-end space-x-3 pt-2">
-                        <button type="button" onClick={onCancel} className="px-4 py-2 bg-primary rounded-lg hover:bg-secondary transition-colors">Cancel</button>
+                        <button type="button" onClick={onCancel} className="px-4 py-2 bg-primary rounded-lg hover:bg-secondary/20 transition-colors">Cancel</button>
                         <button type="submit" className="px-4 py-2 bg-accent rounded-lg hover:bg-accent-hover text-white font-semibold transition-colors">{isEditMode ? 'Save Changes' : 'Save Debt'}</button>
                     </div>
                 </form>
@@ -203,7 +203,7 @@ const DebtDashboard: React.FC = () => {
                     {state.debts.sort((a,b) => b.interestRate - a.interestRate).map(debt => {
                         const progress = (1 - debt.currentBalance / debt.originalAmount) * 100;
                         return (
-                            <Card key={debt.id} className="hover:shadow-accent/20 transition-shadow group">
+                            <Card key={debt.id} className="hover:shadow-accent/10 transition-shadow group">
                                 <CardHeader>
                                     <div className="flex justify-between items-center">
                                         <CardTitle>{debt.name}</CardTitle>

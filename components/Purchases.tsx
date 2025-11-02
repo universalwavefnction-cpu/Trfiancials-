@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { useFinancials } from '../context/FinancialContext';
 import { Purchase, PurchaseStatus, ExpenseCategory, ExpenseMode } from '../types';
@@ -24,7 +25,7 @@ const PurchaseCard: React.FC<{ purchase: Purchase }> = ({ purchase }) => {
 
   return (
     <div ref={drag} style={{ opacity: isDragging ? 0.5 : 1 }} className="cursor-grab">
-        <Card className="mb-4 bg-primary hover:shadow-lg">
+        <Card className="mb-4 bg-primary/30 hover:shadow-lg">
             <CardContent className="p-3">
                 <div className="flex justify-between items-start">
                     <h4 className="font-semibold text-text-primary">{purchase.name}</h4>
@@ -73,9 +74,9 @@ const StatusColumn: React.FC<{ status: PurchaseStatus; children: React.ReactNode
 
     const getStatusColor = () => {
         switch(status) {
-            case PurchaseStatus.Considering: return 'border-yellow-500';
-            case PurchaseStatus.Purchased: return 'border-green-500';
-            case PurchaseStatus.Declined: return 'border-red-500';
+            case PurchaseStatus.Considering: return 'border-yellow-400';
+            case PurchaseStatus.Purchased: return 'border-green-400';
+            case PurchaseStatus.Declined: return 'border-red-400';
             default: return 'border-primary';
         }
     }
@@ -116,25 +117,25 @@ const AddPurchaseForm: React.FC<{ onSave: (data: Omit<Purchase, 'id' | 'status' 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div className="space-y-1">
                             <label className="text-sm font-medium">Item Name</label>
-                            <input type="text" placeholder="e.g., New MacBook Pro" value={name} onChange={e => setName(e.target.value)} className="w-full bg-primary p-2 rounded-md" required />
+                            <input type="text" placeholder="e.g., New MacBook Pro" value={name} onChange={e => setName(e.target.value)} className="w-full bg-primary/50 p-2 rounded-md border border-primary" required />
                         </div>
                         <div className="space-y-1">
                             <label className="text-sm font-medium">Estimated Cost (€)</label>
-                            <input type="number" placeholder="2500" value={cost} onChange={e => setCost(e.target.value)} className="w-full bg-primary p-2 rounded-md" required />
+                            <input type="number" placeholder="2500" value={cost} onChange={e => setCost(e.target.value)} className="w-full bg-primary/50 p-2 rounded-md border border-primary" required />
                         </div>
                         <div className="space-y-1">
                             <label className="text-sm font-medium">Category</label>
-                            <select value={category} onChange={e => setCategory(e.target.value as ExpenseCategory)} className="w-full bg-primary p-2 rounded-md">
+                            <select value={category} onChange={e => setCategory(e.target.value as ExpenseCategory)} className="w-full bg-primary/50 p-2 rounded-md border border-primary">
                                 {Object.values(ExpenseCategory).map(c => <option key={c} value={c}>{c}</option>)}
                             </select>
                         </div>
                     </div>
                     <div className="space-y-1">
                         <label className="text-sm font-medium">Justification (Why do you want this?)</label>
-                        <textarea placeholder="It will improve my productivity for consulting work..." value={justification} onChange={e => setJustification(e.target.value)} className="w-full bg-primary p-2 rounded-md" required />
+                        <textarea placeholder="It will improve my productivity for consulting work..." value={justification} onChange={e => setJustification(e.target.value)} className="w-full bg-primary/50 p-2 rounded-md border border-primary" required />
                     </div>
                      <div className="flex justify-end space-x-3 pt-2">
-                        <button type="button" onClick={onCancel} className="px-4 py-2 bg-primary rounded-lg hover:bg-secondary transition-colors">Cancel</button>
+                        <button type="button" onClick={onCancel} className="px-4 py-2 bg-secondary/20 rounded-lg hover:bg-secondary/40 transition-colors">Cancel</button>
                         <button type="submit" className="px-4 py-2 bg-accent rounded-lg hover:bg-accent-hover text-white font-semibold transition-colors">Add Idea</button>
                     </div>
                 </form>
@@ -188,7 +189,7 @@ const PurchasesComponent: React.FC = () => {
                 {Object.values(PurchaseStatus).map(status => (
                     <StatusColumn key={status} status={status}>
                         {purchasesByStatus[status]?.map(p => <PurchaseCard key={p.id} purchase={p} />)}
-                    </StatusColumn>
+                    </DndProvider>
                 ))}
             </div>
         </div>

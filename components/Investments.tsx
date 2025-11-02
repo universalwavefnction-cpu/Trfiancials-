@@ -7,7 +7,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recha
 
 const formatCurrency = (value: number) => `€${value.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
-const COLORS = ['#38b2ac', '#4299e1', '#9f7aea', '#ed8936', '#f56565'];
+const COLORS = ['#8b5cf6', '#a78bfa', '#c4b5fd', '#d5d1fa', '#10b981'];
 
 const AssetAllocationChart: React.FC = () => {
     const { state } = useFinancials();
@@ -40,7 +40,7 @@ const AssetAllocationChart: React.FC = () => {
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                 </Pie>
-                <Tooltip contentStyle={{backgroundColor: '#2d3748', border: 'none'}}/>
+                <Tooltip contentStyle={{backgroundColor: '#ffffff', border: '1px solid #ede9fe', borderRadius: '0.5rem'}}/>
                 <Legend />
             </PieChart>
         </ResponsiveContainer>

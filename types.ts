@@ -141,4 +141,4 @@ export type FinancialAction =
   | { type: "UPDATE_DEBT_BALANCE"; payload: { id: string; newBalance: number } }
   | { type: "UPDATE_ASSET_VALUE"; payload: { id: string; newValue: number } };
 
-export type View = "dashboard" | "expenses" | "debts" | "income" | "investments" | "purchases" | "sync";
+export type View = "dashboard" | "expenses" | "debts" | "income" | "investments" | "purchases" | "sync" | "rundown";

@@ -23,6 +23,7 @@ import {
   ArrowLeftRight,
   AlertTriangle,
   Pencil,
+  TrendingDown,
 } from 'lucide-react';
 
 export const Icons = {
@@ -50,4 +51,5 @@ export const Icons = {
   Sync: ArrowLeftRight,
   Warning: AlertTriangle,
   Edit: Pencil,
+  Rundown: TrendingDown,
 };
