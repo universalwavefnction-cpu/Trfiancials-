@@ -235,7 +235,7 @@ export const FinancialProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   
   useEffect(() => {
     const rawData = window.localStorage.getItem('financialData');
-    if (!rawData || !JSON.parse(rawData).expenses) { 
+    if (!rawData || !JSON.parse(rawData).investmentBaskets) { 
       dispatch({ type: 'SET_STATE', payload: initialState });
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
