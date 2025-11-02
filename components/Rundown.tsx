@@ -18,7 +18,7 @@ const FormattedResponse: React.FC<{ content: string }> = ({ content }) => {
                     return <h2 key={index} className="text-2xl font-bold text-text-primary mb-4">{line.replace('#', '').trim()}</h2>;
                 }
                 if (line.startsWith('*')) {
-                    return <p key={index} className="ml-4 flex items-start"><span className="mr-2 mt-1 text-accent">●</span><span>{line.replace('*', '').trim()}</span></p>;
+                    return <p key={index} className="ml-4 flex items-start"><span className="mr-2 mt-1 text-brand">●</span><span>{line.replace('*', '').trim()}</span></p>;
                 }
                 return <p key={index}>{line}</p>;
             })}
@@ -76,7 +76,7 @@ const Rundown: React.FC = () => {
                                 min="6"
                                 max="60"
                                 step="1"
-                                className="w-full bg-primary/50 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-accent border border-primary"
+                                className="w-full bg-background p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-brand border border-secondary"
                             />
                         </div>
                         <button

@@ -51,37 +51,37 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ onSave, onUpdate, onCancel, i
     };
 
     return (
-        <div className="my-4 p-4 bg-primary/30 rounded-lg animate-fade-in">
+        <div className="my-4 p-4 bg-primary/50 rounded-lg animate-fade-in">
             <h3 className="text-lg font-semibold mb-4 text-text-primary">{isEditMode ? 'Edit Expense' : 'Add New Expense'}</h3>
             <form onSubmit={handleSubmit} className="space-y-4">
                  <div className="space-y-2">
                     <label htmlFor="exp-desc" className="text-sm font-medium text-text-secondary">Description</label>
-                    <input id="exp-desc" type="text" placeholder="e.g., Dinner with client" value={description} onChange={(e) => setDescription(e.target.value)} className="w-full bg-surface p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-accent border border-primary" required />
+                    <input id="exp-desc" type="text" placeholder="e.g., Dinner with client" value={description} onChange={(e) => setDescription(e.target.value)} className="w-full bg-surface p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-brand border border-secondary" required />
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                      <div className="space-y-2">
                         <label htmlFor="exp-date" className="text-sm font-medium text-text-secondary">Date</label>
-                        <input id="exp-date" type="date" value={date} onChange={(e) => setDate(e.target.value)} className="w-full bg-surface p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-accent border border-primary" required />
+                        <input id="exp-date" type="date" value={date} onChange={(e) => setDate(e.target.value)} className="w-full bg-surface p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-brand border border-secondary" required />
                     </div>
                     <div className="space-y-2">
                         <label htmlFor="exp-amount" className="text-sm font-medium text-text-secondary">Amount (€)</label>
-                        <input id="exp-amount" type="number" placeholder="50" value={amount} onChange={(e) => setAmount(e.target.value)} className="w-full bg-surface p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-accent border border-primary" required />
+                        <input id="exp-amount" type="number" placeholder="50" value={amount} onChange={(e) => setAmount(e.target.value)} className="w-full bg-surface p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-brand border border-secondary" required />
                     </div>
                     <div className="space-y-2">
                         <label htmlFor="exp-category" className="text-sm font-medium text-text-secondary">Category</label>
-                        <select id="exp-category" value={category} onChange={(e) => setCategory(e.target.value as ExpenseCategory)} className="w-full bg-surface p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-accent border border-primary">
+                        <select id="exp-category" value={category} onChange={(e) => setCategory(e.target.value as ExpenseCategory)} className="w-full bg-surface p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-brand border border-secondary">
                             {Object.values(ExpenseCategory).map(s => <option key={s} value={s}>{s}</option>)}
                         </select>
                     </div>
                      <div className="space-y-2">
                         <label htmlFor="exp-mode" className="text-sm font-medium text-text-secondary">Mode</label>
-                        <select id="exp-mode" value={mode} onChange={(e) => setMode(e.target.value as ExpenseMode)} className="w-full bg-surface p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-accent border border-primary">
+                        <select id="exp-mode" value={mode} onChange={(e) => setMode(e.target.value as ExpenseMode)} className="w-full bg-surface p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-brand border border-secondary">
                             {Object.values(ExpenseMode).map(s => <option key={s} value={s}>{s}</option>)}
                         </select>
                     </div>
                 </div>
                 <div className="flex justify-end space-x-3 pt-2">
-                    <button type="button" onClick={onCancel} className="px-4 py-2 bg-secondary/20 rounded-lg hover:bg-secondary/40 transition-colors">Cancel</button>
+                    <button type="button" onClick={onCancel} className="px-4 py-2 bg-primary rounded-lg hover:bg-secondary/80 transition-colors">Cancel</button>
                     <button type="submit" className="px-4 py-2 bg-accent rounded-lg hover:bg-accent-hover text-white font-semibold transition-colors">{isEditMode ? 'Save Changes' : 'Save Expense'}</button>
                 </div>
             </form>
@@ -119,33 +119,33 @@ const AddRecurringExpenseForm: React.FC<{ onSave: (expense: Omit<RecurringExpens
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div className="space-y-2">
                         <label className="text-sm font-medium text-text-secondary">Description</label>
-                        <input type="text" placeholder="e.g., Monthly Rent" value={description} onChange={(e) => setDescription(e.target.value)} className="w-full bg-primary/50 p-2 rounded-md border border-primary" required />
+                        <input type="text" placeholder="e.g., Monthly Rent" value={description} onChange={(e) => setDescription(e.target.value)} className="w-full bg-background p-2 rounded-md border border-secondary" required />
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div className="space-y-2">
                             <label className="text-sm font-medium text-text-secondary">Amount (€)</label>
-                            <input type="number" placeholder="650" value={amount} onChange={(e) => setAmount(e.target.value)} className="w-full bg-primary/50 p-2 rounded-md border border-primary" required />
+                            <input type="number" placeholder="650" value={amount} onChange={(e) => setAmount(e.target.value)} className="w-full bg-background p-2 rounded-md border border-secondary" required />
                         </div>
                          <div className="space-y-2">
                             <label className="text-sm font-medium text-text-secondary">Start Month</label>
-                            <input type="month" value={startDate} onChange={(e) => setStartDate(e.target.value)} className="w-full bg-primary/50 p-2 rounded-md border border-primary" required />
+                            <input type="month" value={startDate} onChange={(e) => setStartDate(e.target.value)} className="w-full bg-background p-2 rounded-md border border-secondary" required />
                         </div>
                          <div className="space-y-2">
                             <label className="text-sm font-medium text-text-secondary">Category</label>
-                            <select value={category} onChange={(e) => setCategory(e.target.value as ExpenseCategory)} className="w-full bg-primary/50 p-2 rounded-md border border-primary">
+                            <select value={category} onChange={(e) => setCategory(e.target.value as ExpenseCategory)} className="w-full bg-background p-2 rounded-md border border-secondary">
                                 {Object.values(ExpenseCategory).map(s => <option key={s} value={s}>{s}</option>)}
                             </select>
                         </div>
                          <div className="space-y-2">
                             <label className="text-sm font-medium text-text-secondary">Mode</label>
                             {/* FIX: Explicitly type the event to ensure e.target.value is inferred as a string. */}
-                            <select value={mode} onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setMode(e.target.value as ExpenseMode)} className="w-full bg-primary/50 p-2 rounded-md border border-primary">
+                            <select value={mode} onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setMode(e.target.value as ExpenseMode)} className="w-full bg-background p-2 rounded-md border border-secondary">
                                 {Object.values(ExpenseMode).map(s => <option key={s} value={s}>{s}</option>)}
                             </select>
                         </div>
                     </div>
                     <div className="flex justify-end space-x-3 pt-2">
-                        <button type="button" onClick={onCancel} className="px-4 py-2 bg-secondary/20 rounded-lg">Cancel</button>
+                        <button type="button" onClick={onCancel} className="px-4 py-2 bg-primary rounded-lg">Cancel</button>
                         <button type="submit" className="px-4 py-2 bg-accent rounded-lg text-white">Save Recurring</button>
                     </div>
                 </form>
@@ -245,7 +245,7 @@ const ExpenseTracker: React.FC = () => {
                     <h1 className="text-3xl font-bold text-text-primary">Expense Planning</h1>
                     <p className="text-text-secondary mt-1">Plan vs. Actual spending for your 14-month horizon.</p>
                 </div>
-                 <div className="flex space-x-2 p-1 bg-primary/50 rounded-lg border border-primary">
+                 <div className="flex space-x-2 p-1 bg-primary rounded-lg border border-secondary">
                     <button onClick={() => setViewMode(ExpenseMode.Survival)} className={`px-3 py-1 text-sm font-semibold rounded-md ${viewMode === ExpenseMode.Survival ? 'bg-accent text-white' : 'text-text-secondary'}`}>Survival</button>
                     <button onClick={() => setViewMode(ExpenseMode.Growth)} className={`px-3 py-1 text-sm font-semibold rounded-md ${viewMode === ExpenseMode.Growth ? 'bg-accent text-white' : 'text-text-secondary'}`}>Growth</button>
                 </div>
@@ -256,13 +256,13 @@ const ExpenseTracker: React.FC = () => {
                 <CardContent>
                     <ResponsiveContainer width="100%" height={300}>
                         <ComposedChart data={monthlyData} margin={{ top: 5, right: 20, left: 20, bottom: 5 }}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                            <XAxis dataKey="monthLabel" stroke="#78716c" />
-                            <YAxis stroke="#78716c" />
-                            <Tooltip cursor={{fill: '#ede9fe'}} contentStyle={{backgroundColor: '#ffffff', border: '1px solid #ede9fe', borderRadius: '0.5rem'}}/>
+                            <CartesianGrid strokeDasharray="3 3" stroke="#e9ecef" />
+                            <XAxis dataKey="monthLabel" stroke="#6c757d" />
+                            <YAxis stroke="#6c757d" />
+                            <Tooltip cursor={{fill: '#f1f3f5'}} contentStyle={{backgroundColor: '#ffffff', border: '1px solid #dee2e6', borderRadius: '0.5rem'}}/>
                             <Legend />
-                            <Bar dataKey="Actual" fill="#ef4444" />
-                            <Line type="monotone" dataKey="Planned" stroke="#8b5cf6" strokeWidth={2} />
+                            <Bar dataKey="Actual" fill="#dc3545" />
+                            <Line type="monotone" dataKey="Planned" stroke="#0d6efd" strokeWidth={2} />
                         </ComposedChart>
                     </ResponsiveContainer>
                 </CardContent>
@@ -284,7 +284,7 @@ const ExpenseTracker: React.FC = () => {
                                 </thead>
                                 <tbody>
                                     {monthlyData.map(d => (
-                                        <tr key={d.monthKey} className="border-t border-primary">
+                                        <tr key={d.monthKey} className="border-t border-secondary">
                                             <td className="py-3 px-4 font-medium">{d.monthLabel}</td>
                                             <td className="py-3 px-4 text-right">{formatCurrency(d.Actual)}</td>
                                             <td className="py-3 px-4 text-right">{formatCurrency(d.Planned)}</td>
@@ -318,7 +318,7 @@ const ExpenseTracker: React.FC = () => {
                                             placeholder="0"
                                             value={plans[m.key] || ''}
                                             onChange={(e) => handlePlanChange(m.key, e.target.value)}
-                                            className="w-full bg-primary/50 p-2 pl-6 rounded-md focus:outline-none focus:ring-2 focus:ring-accent border border-primary"
+                                            className="w-full bg-background p-2 pl-6 rounded-md focus:outline-none focus:ring-2 focus:ring-brand border border-secondary"
                                         />
                                     </div>
                                 </div>
@@ -386,7 +386,7 @@ const ExpenseTracker: React.FC = () => {
                                     <div className="flex items-center space-x-2">
                                         <p className="font-bold text-danger">{formatCurrency(exp.amount)}</p>
                                         <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center space-x-1">
-                                            <button onClick={() => handleStartEditing(exp)} className="p-1 rounded-full text-text-secondary hover:text-accent hover:bg-surface"><Icons.Edit className="w-4 h-4" /></button>
+                                            <button onClick={() => handleStartEditing(exp)} className="p-1 rounded-full text-text-secondary hover:text-brand hover:bg-surface"><Icons.Edit className="w-4 h-4" /></button>
                                             <button onClick={() => handleDeleteExpense(exp.id)} className="p-1 rounded-full text-text-secondary hover:text-danger hover:bg-surface"><Icons.Trash className="w-4 h-4" /></button>
                                         </div>
                                     </div>

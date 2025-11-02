@@ -7,7 +7,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recha
 
 const formatCurrency = (value: number) => `€${value.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
-const COLORS = ['#8b5cf6', '#a78bfa', '#c4b5fd', '#d5d1fa', '#10b981'];
+const COLORS = ['#212529', '#0d6efd', '#6c757d', '#198754', '#adb5bd'];
 
 const AssetAllocationChart: React.FC = () => {
     const { state } = useFinancials();
@@ -32,15 +32,13 @@ const AssetAllocationChart: React.FC = () => {
                     fill="#8884d8"
                     dataKey="value"
                     nameKey="name"
-                    // Fix: The `percent` prop from recharts can be undefined. Using `|| 0` ensures we always have a number
-                    // for the multiplication, preventing the type error on the arithmetic operation.
                     label={({ name, percent }) => `${name} ${((percent || 0) * 100).toFixed(0)}%`}
                 >
                     {data.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                 </Pie>
-                <Tooltip contentStyle={{backgroundColor: '#ffffff', border: '1px solid #ede9fe', borderRadius: '0.5rem'}}/>
+                <Tooltip contentStyle={{backgroundColor: '#ffffff', border: '1px solid #dee2e6', borderRadius: '0.5rem'}}/>
                 <Legend />
             </PieChart>
         </ResponsiveContainer>

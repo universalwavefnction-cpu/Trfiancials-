@@ -5,6 +5,7 @@ import { Card, CardHeader, CardTitle, CardContent } from './ui/Card';
 import { Icons } from './ui/Icons';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, PieChart, Pie, Cell, Sector } from 'recharts';
 import { getFinancialInsights, getFinancialRundown } from '../services/geminiService';
+import { PurchaseStatus } from '../types';
 
 const formatCurrency = (value: number) => `€${value.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
@@ -53,11 +54,11 @@ const GoalProgress: React.FC = () => {
         <Card>
             <CardHeader className="flex justify-between items-center">
                 <CardTitle>€1M Goal</CardTitle>
-                <Icons.Goal className="w-6 h-6 text-accent"/>
+                <Icons.Goal className="w-6 h-6 text-brand"/>
             </CardHeader>
             <CardContent>
                 <div className="w-full bg-primary rounded-full h-4">
-                    <div className="bg-accent h-4 rounded-full" style={{ width: `${progress}%` }}></div>
+                    <div className="bg-brand h-4 rounded-full" style={{ width: `${progress}%` }}></div>
                 </div>
                 <div className="flex justify-between mt-2 text-sm font-medium">
                     <span>{formatCurrency(netWorth)}</span>
@@ -110,7 +111,7 @@ const MonthlySummary: React.FC = () => {
                     </div>
                     <span className="font-bold text-lg text-danger">{formatCurrency(expenses)}</span>
                 </div>
-                <hr className="border-primary" />
+                <hr className="border-secondary" />
                  <div className="flex justify-between items-center">
                     <span className="font-semibold text-text-primary">Net Cash Flow</span>
                     <span className={`font-bold text-2xl ${netFlow >= 0 ? 'text-success' : 'text-danger'}`}>
@@ -121,6 +122,72 @@ const MonthlySummary: React.FC = () => {
         </Card>
     );
 };
+
+const PlannedPurchases: React.FC = () => {
+    const { state } = useFinancials();
+
+    const { plannedPurchases, totalPlannedCost, currentNetFlow, projectedNetFlow } = useMemo(() => {
+        const planned = state.purchases.filter(p => p.status === PurchaseStatus.Considering);
+        const totalCost = planned.reduce((sum, p) => sum + p.cost, 0);
+
+        const currentMonthKey = '2024-11'; // Using fixed month for consistency with mock data
+        const income = state.income.filter(i => i.date.startsWith(currentMonthKey)).reduce((sum, i) => sum + i.amount, 0);
+        const expenses = state.expenses.filter(e => e.date.startsWith(currentMonthKey)).reduce((sum, e) => sum + e.amount, 0);
+        const netFlow = income - expenses;
+
+        const projectedFlow = netFlow - totalCost;
+
+        return {
+            plannedPurchases: planned,
+            totalPlannedCost: totalCost,
+            currentNetFlow: netFlow,
+            projectedNetFlow: projectedFlow,
+        };
+    }, [state.purchases, state.income, state.expenses]);
+
+    if (plannedPurchases.length === 0) {
+        return null;
+    }
+
+    return (
+        <Card>
+            <CardHeader>
+                <CardTitle>Planned Purchases Impact</CardTitle>
+            </CardHeader>
+            <CardContent>
+                <div className="space-y-4">
+                    <div className="space-y-2 p-3 bg-primary/50 rounded-lg">
+                        <div className="flex justify-between items-center text-sm">
+                            <span className="text-text-secondary">Current Month Net Flow</span>
+                            <span className="font-semibold">{formatCurrency(currentNetFlow)}</span>
+                        </div>
+                        <div className="flex justify-between items-center text-sm">
+                            <span className="text-text-secondary">Planned Spending</span>
+                            <span className="font-semibold text-danger">{formatCurrency(-totalPlannedCost)}</span>
+                        </div>
+                        <hr className="border-secondary" />
+                        <div className="flex justify-between items-center font-bold">
+                            <span className="text-text-primary">Projected Net Flow</span>
+                            <span className={projectedNetFlow >= 0 ? 'text-success' : 'text-danger'}>{formatCurrency(projectedNetFlow)}</span>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 className="font-semibold text-text-primary mb-2">Items Considered:</h4>
+                        <div className="space-y-2 max-h-48 overflow-y-auto">
+                            {plannedPurchases.map(p => (
+                                <div key={p.id} className="flex justify-between items-center text-sm p-2 rounded hover:bg-primary">
+                                    <span className="text-text-secondary">{p.name}</span>
+                                    <span className="font-medium text-text-primary">{formatCurrency(p.cost)}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            </CardContent>
+        </Card>
+    );
+};
+
 
 const InsightsEngine: React.FC = () => {
     const { state } = useFinancials();
@@ -152,7 +219,7 @@ const InsightsEngine: React.FC = () => {
         <Card>
             <CardHeader className="flex justify-between items-center">
                 <CardTitle>AI Financial Insight</CardTitle>
-                <Icons.Insights className="w-6 h-6 text-accent"/>
+                <Icons.Insights className="w-6 h-6 text-brand"/>
             </CardHeader>
             <CardContent>
                 {isLoading && <p className="text-text-secondary animate-pulse">Generating insight...</p>}
@@ -162,7 +229,7 @@ const InsightsEngine: React.FC = () => {
                 <button 
                     onClick={generateInsight} 
                     disabled={isLoading}
-                    className="mt-4 w-full bg-accent text-white font-semibold py-2 px-4 rounded-lg hover:bg-accent-hover transition-colors disabled:bg-primary disabled:cursor-not-allowed flex items-center justify-center"
+                    className="mt-4 w-full bg-accent text-white font-semibold py-2 px-4 rounded-lg hover:bg-accent-hover transition-colors disabled:bg-primary disabled:text-text-secondary disabled:cursor-not-allowed flex items-center justify-center"
                 >
                     {isLoading ? 'Thinking...' : 'Generate Insight'}
                 </button>
@@ -184,7 +251,7 @@ const FormattedResponse: React.FC<{ content: string }> = ({ content }) => {
                     return <h2 key={index} className="text-2xl font-bold text-text-primary mb-4">{line.replace('#', '').trim()}</h2>;
                 }
                 if (line.startsWith('*')) {
-                    return <p key={index} className="ml-4 flex items-start"><span className="mr-2 mt-1 text-accent">●</span><span>{line.replace('*', '').trim()}</span></p>;
+                    return <p key={index} className="ml-4 flex items-start"><span className="mr-2 mt-1 text-brand">●</span><span>{line.replace('*', '').trim()}</span></p>;
                 }
                 return <p key={index}>{line}</p>;
             })}
@@ -222,7 +289,7 @@ const RundownEngine: React.FC = () => {
         <Card>
             <CardHeader>
                 <CardTitle className="flex items-center">
-                    <Icons.Rundown className="w-6 h-6 mr-3 text-accent"/>
+                    <Icons.Rundown className="w-6 h-6 mr-3 text-brand"/>
                     Financial Rundown
                 </CardTitle>
             </CardHeader>
@@ -238,7 +305,7 @@ const RundownEngine: React.FC = () => {
                             min="6"
                             max="60"
                             step="1"
-                            className="w-full bg-primary/50 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-accent border border-primary"
+                            className="w-full bg-background p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-brand border border-secondary"
                         />
                     </div>
                     <button
@@ -274,7 +341,7 @@ const RundownEngine: React.FC = () => {
                 )}
 
                 {forecast && (
-                    <div className="mt-4 border-t border-primary pt-4 animate-fade-in">
+                    <div className="mt-4 border-t border-secondary pt-4 animate-fade-in">
                         <FormattedResponse content={forecast} />
                     </div>
                 )}
@@ -287,13 +354,14 @@ const RundownEngine: React.FC = () => {
 const Dashboard: React.FC = () => {
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-bold text-text-primary">Dashboard</h1>
+      <h1 className="text-3xl font-bold text-text-primary">Good morning, Sam</h1>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2"><NetWorthTracker /></div>
         <GoalProgress />
       </div>
-       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <MonthlySummary />
+        <PlannedPurchases />
         <InsightsEngine />
       </div>
       <div className="animate-fade-in">

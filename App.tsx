@@ -22,7 +22,7 @@ const NavItem: React.FC<{
     onClick={onClick}
     className={`flex items-center w-full px-4 py-3 text-sm font-medium transition-colors duration-200 rounded-lg group ${
       isActive
-        ? 'bg-accent text-white'
+        ? 'bg-primary text-text-primary font-semibold'
         : 'text-text-secondary hover:bg-primary hover:text-text-primary'
     }`}
   >
@@ -81,9 +81,9 @@ const AppContent: React.FC = () => {
   return (
     <div className="flex h-screen bg-background text-text-primary">
       {/* Desktop Sidebar */}
-      <aside className="hidden md:flex flex-col w-64 bg-surface flex-shrink-0 border-r border-primary/50">
-        <div className="flex items-center justify-center h-20 border-b border-primary/50">
-          <Icons.Goal className="w-8 h-8 text-accent" />
+      <aside className="hidden md:flex flex-col w-64 bg-surface flex-shrink-0 border-r border-secondary">
+        <div className="flex items-center justify-center h-20 border-b border-secondary">
+          <Icons.Goal className="w-8 h-8 text-brand" />
           <span className="ml-2 text-xl font-bold">WaveFinances</span>
         </div>
         <nav className="flex-1 px-4 py-6 space-y-2">
@@ -101,9 +101,9 @@ const AppContent: React.FC = () => {
 
       {/* Main Content */}
       <main className="flex-1 flex flex-col overflow-hidden pb-16 md:pb-0">
-        <header className="flex items-center justify-between p-4 bg-surface shadow-sm md:hidden border-b border-primary/50">
+        <header className="flex items-center justify-between p-4 bg-surface shadow-sm md:hidden border-b border-secondary">
           <div className="flex items-center">
-            <Icons.Goal className="w-7 h-7 text-accent" />
+            <Icons.Goal className="w-7 h-7 text-brand" />
             <span className="ml-2 text-lg font-bold">WaveFinances</span>
           </div>
         </header>
@@ -113,7 +113,7 @@ const AppContent: React.FC = () => {
       </main>
 
       {/* Mobile Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-surface border-t border-primary/50 md:hidden flex justify-around">
+      <nav className="fixed bottom-0 left-0 right-0 bg-surface border-t border-secondary md:hidden flex justify-around">
         {navItems.map(item => (
             <MobileNavItem 
                 key={item.view}

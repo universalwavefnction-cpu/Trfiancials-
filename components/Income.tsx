@@ -56,31 +56,31 @@ const IncomeForm: React.FC<IncomeFormProps> = ({ onSave, onUpdate, onCancel, ini
     };
     
     return (
-        <div className="my-4 p-4 bg-primary/30 rounded-lg animate-fade-in">
+        <div className="my-4 p-4 bg-primary/50 rounded-lg animate-fade-in">
              <h3 className="text-lg font-semibold mb-4 text-text-primary">{isEditMode ? 'Edit Income' : 'Add New Income'}</h3>
             <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
                     <label htmlFor="income-desc" className="text-sm font-medium text-text-secondary">Description</label>
-                    <input id="income-desc" type="text" placeholder="e.g., Project Phoenix" value={description} onChange={(e) => setDescription(e.target.value)} className="w-full bg-surface p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-accent border border-primary" required />
+                    <input id="income-desc" type="text" placeholder="e.g., Project Phoenix" value={description} onChange={(e) => setDescription(e.target.value)} className="w-full bg-surface p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-brand border border-secondary" required />
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div className="space-y-2">
                         <label htmlFor="income-date" className="text-sm font-medium text-text-secondary">Date</label>
-                        <input id="income-date" type="date" value={date} onChange={(e) => setDate(e.target.value)} className="w-full bg-surface p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-accent border border-primary" required />
+                        <input id="income-date" type="date" value={date} onChange={(e) => setDate(e.target.value)} className="w-full bg-surface p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-brand border border-secondary" required />
                     </div>
                     <div className="space-y-2">
                         <label htmlFor="income-amount" className="text-sm font-medium text-text-secondary">Amount (€)</label>
-                        <input id="income-amount" type="number" placeholder="1000" value={amount} onChange={(e) => setAmount(e.target.value)} className="w-full bg-surface p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-accent border border-primary" required />
+                        <input id="income-amount" type="number" placeholder="1000" value={amount} onChange={(e) => setAmount(e.target.value)} className="w-full bg-surface p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-brand border border-secondary" required />
                     </div>
                     <div className="space-y-2">
                         <label htmlFor="income-source" className="text-sm font-medium text-text-secondary">Source</label>
-                        <select id="income-source" value={source} onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setSource(e.target.value as IncomeSource)} className="w-full bg-surface p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-accent border border-primary">
+                        <select id="income-source" value={source} onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setSource(e.target.value as IncomeSource)} className="w-full bg-surface p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-brand border border-secondary">
                             {Object.values(IncomeSource).map(s => <option key={s} value={s}>{s}</option>)}
                         </select>
                     </div>
                 </div>
                 <div className="flex justify-end space-x-3 pt-2">
-                    <button type="button" onClick={onCancel} className="px-4 py-2 bg-secondary/20 rounded-lg hover:bg-secondary/40 transition-colors">Cancel</button>
+                    <button type="button" onClick={onCancel} className="px-4 py-2 bg-primary rounded-lg hover:bg-secondary/80 transition-colors">Cancel</button>
                     <button type="submit" className="px-4 py-2 bg-accent rounded-lg hover:bg-accent-hover text-white font-semibold transition-colors">{isEditMode ? 'Save Changes' : 'Save Income'}</button>
                 </div>
             </form>
@@ -164,13 +164,13 @@ const IncomeTracker: React.FC = () => {
                 <CardContent>
                     <ResponsiveContainer width="100%" height={300}>
                         <ComposedChart data={monthlyData} margin={{ top: 5, right: 20, left: 20, bottom: 5 }}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                            <XAxis dataKey="month" stroke="#78716c" />
-                            <YAxis stroke="#78716c" />
-                            <Tooltip cursor={{fill: '#ede9fe'}} contentStyle={{backgroundColor: '#ffffff', border: '1px solid #ede9fe', borderRadius: '0.5rem'}} />
+                            <CartesianGrid strokeDasharray="3 3" stroke="#e9ecef" />
+                            <XAxis dataKey="month" stroke="#6c757d" />
+                            <YAxis stroke="#6c757d" />
+                            <Tooltip cursor={{fill: '#f1f3f5'}} contentStyle={{backgroundColor: '#ffffff', border: '1px solid #dee2e6', borderRadius: '0.5rem'}} />
                             <Legend />
-                            <Bar dataKey="Actual" fill="#10b981" />
-                            <Line type="monotone" dataKey="Goal" stroke="#8b5cf6" strokeWidth={2} />
+                            <Bar dataKey="Actual" fill="#198754" />
+                            <Line type="monotone" dataKey="Goal" stroke="#0d6efd" strokeWidth={2} />
                         </ComposedChart>
                     </ResponsiveContainer>
                 </CardContent>
@@ -191,7 +191,7 @@ const IncomeTracker: React.FC = () => {
                             </thead>
                             <tbody>
                                 {monthlyData.map(d => (
-                                    <tr key={d.month} className="border-t border-primary">
+                                    <tr key={d.month} className="border-t border-secondary">
                                         <td className="py-3 px-4 font-medium">{d.month}</td>
                                         <td className="py-3 px-4 text-right">{formatCurrency(d.Actual)}</td>
                                         <td className="py-3 px-4 text-right">{formatCurrency(d.Goal)}</td>
@@ -222,7 +222,7 @@ const IncomeTracker: React.FC = () => {
                                             placeholder="0"
                                             value={goals[m.key] || ''}
                                             onChange={(e) => handleGoalChange(m.key, e.target.value)}
-                                            className="w-full bg-primary/50 p-2 pl-6 rounded-md focus:outline-none focus:ring-2 focus:ring-accent border border-primary"
+                                            className="w-full bg-background p-2 pl-6 rounded-md focus:outline-none focus:ring-2 focus:ring-brand border border-secondary"
                                         />
                                     </div>
                                 </div>
@@ -255,7 +255,7 @@ const IncomeTracker: React.FC = () => {
                                         <div className="flex items-center space-x-2">
                                             <p className="font-bold text-success">{formatCurrency(inc.amount)}</p>
                                             <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center space-x-1">
-                                                <button onClick={() => handleStartEditing(inc)} className="p-1 rounded-full text-text-secondary hover:text-accent hover:bg-surface"><Icons.Edit className="w-4 h-4" /></button>
+                                                <button onClick={() => handleStartEditing(inc)} className="p-1 rounded-full text-text-secondary hover:text-brand hover:bg-surface"><Icons.Edit className="w-4 h-4" /></button>
                                                 <button onClick={() => handleDeleteIncome(inc.id)} className="p-1 rounded-full text-text-secondary hover:text-danger hover:bg-surface"><Icons.Trash className="w-4 h-4" /></button>
                                             </div>
                                         </div>

@@ -50,7 +50,7 @@ const Sync: React.FC = () => {
             <Card>
                 <CardHeader>
                     <CardTitle className="flex items-center">
-                        <Icons.Insights className="w-5 h-5 mr-2 text-accent" />
+                        <Icons.Insights className="w-5 h-5 mr-2 text-brand" />
                         How Your Data is Stored
                     </CardTitle>
                 </CardHeader>
@@ -103,7 +103,7 @@ const Sync: React.FC = () => {
                         <p className="text-text-secondary mb-4">
                             Select the <code>.json</code> file you exported from another device. This will replace all data on this device.
                         </p>
-                         <label className="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-primary text-text-primary font-semibold rounded-lg hover:bg-primary/80 transition-colors cursor-pointer">
+                         <label className="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-primary text-text-primary font-semibold rounded-lg hover:bg-secondary/80 transition-colors cursor-pointer">
                             <Icons.Upload className="w-5 h-5" />
                             <span>Import Data (.json)</span>
                             <input type="file" accept=".json" className="hidden" onChange={handleImport} />

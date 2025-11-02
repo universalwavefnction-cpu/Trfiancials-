@@ -1,5 +1,6 @@
+
 import React, { createContext, useReducer, useContext, useEffect } from 'react';
-import { FinancialData, FinancialAction, Expense, Debt, Income, Asset, ExpenseCategory, ExpenseMode, IncomeSource, AssetCategory, RecurringExpense } from '../types';
+import { FinancialData, FinancialAction, Expense, Debt, Income, Asset, ExpenseCategory, ExpenseMode, IncomeSource, AssetCategory, RecurringExpense, Purchase, PurchaseStatus } from '../types';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 
 const months = [];
@@ -55,7 +56,17 @@ const initialState: FinancialData = {
     ...months.map((m, i) => ({ id: `eps${i}`, month: m, mode: ExpenseMode.Survival, amount: 800 })),
     ...months.map((m, i) => ({ id: `epg${i}`, month: m, mode: ExpenseMode.Growth, amount: 1500 })),
   ],
-  purchases: [],
+  purchases: [
+     {
+        id: 'p1',
+        name: 'New Standing Desk',
+        cost: 450,
+        category: ExpenseCategory.BusinessExpenses,
+        justification: 'Improve ergonomics and productivity.',
+        status: PurchaseStatus.Considering,
+        dateAdded: '2024-11-10',
+    }
+  ],
 };
 
 const financialReducer = (state: FinancialData, action: FinancialAction): FinancialData => {

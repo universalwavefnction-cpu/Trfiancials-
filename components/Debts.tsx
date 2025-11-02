@@ -58,7 +58,7 @@ const DebtForm: React.FC<DebtFormProps> = ({ onSave, onUpdate, onCancel, initial
                             placeholder="e.g., Car Loan"
                             value={name}
                             onChange={(e) => setName(e.target.value)}
-                            className="w-full bg-primary/50 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-accent border border-primary"
+                            className="w-full bg-background p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-brand border border-secondary"
                             required
                         />
                     </div>
@@ -71,7 +71,7 @@ const DebtForm: React.FC<DebtFormProps> = ({ onSave, onUpdate, onCancel, initial
                                 placeholder="5000"
                                 value={originalAmount}
                                 onChange={(e) => setOriginalAmount(e.target.value)}
-                                className="w-full bg-primary/50 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-accent border border-primary"
+                                className="w-full bg-background p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-brand border border-secondary"
                                 required
                             />
                         </div>
@@ -83,7 +83,7 @@ const DebtForm: React.FC<DebtFormProps> = ({ onSave, onUpdate, onCancel, initial
                                 placeholder="4800"
                                 value={currentBalance}
                                 onChange={(e) => setCurrentBalance(e.target.value)}
-                                className="w-full bg-primary/50 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-accent border border-primary"
+                                className="w-full bg-background p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-brand border border-secondary"
                                 required
                             />
                         </div>
@@ -96,7 +96,7 @@ const DebtForm: React.FC<DebtFormProps> = ({ onSave, onUpdate, onCancel, initial
                                 placeholder="5.5"
                                 value={interestRate}
                                 onChange={(e) => setInterestRate(e.target.value)}
-                                className="w-full bg-primary/50 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-accent border border-primary"
+                                className="w-full bg-background p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-brand border border-secondary"
                                 required
                             />
                         </div>
@@ -108,13 +108,13 @@ const DebtForm: React.FC<DebtFormProps> = ({ onSave, onUpdate, onCancel, initial
                                 placeholder="100"
                                 value={minimumPayment}
                                 onChange={(e) => setMinimumPayment(e.target.value)}
-                                className="w-full bg-primary/50 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-accent border border-primary"
+                                className="w-full bg-background p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-brand border border-secondary"
                                 required
                             />
                         </div>
                     </div>
                     <div className="flex justify-end space-x-3 pt-2">
-                        <button type="button" onClick={onCancel} className="px-4 py-2 bg-primary rounded-lg hover:bg-secondary/20 transition-colors">Cancel</button>
+                        <button type="button" onClick={onCancel} className="px-4 py-2 bg-primary rounded-lg hover:bg-secondary/80 transition-colors">Cancel</button>
                         <button type="submit" className="px-4 py-2 bg-accent rounded-lg hover:bg-accent-hover text-white font-semibold transition-colors">{isEditMode ? 'Save Changes' : 'Save Debt'}</button>
                     </div>
                 </form>
@@ -174,9 +174,9 @@ const DebtDashboard: React.FC = () => {
                     <p className="text-4xl font-bold text-danger">{formatCurrency(totalDebt)}</p>
                     <div className="mt-4">
                          <div className="w-full bg-primary rounded-full h-4">
-                            <div className="bg-accent h-4 rounded-full" style={{ width: `${overallProgress}%` }}></div>
+                            <div className="bg-brand h-4 rounded-full" style={{ width: `${overallProgress}%` }}></div>
                         </div>
-                        <p className="text-right mt-1 font-semibold text-accent">{overallProgress.toFixed(1)}% paid off</p>
+                        <p className="text-right mt-1 font-semibold text-brand">{overallProgress.toFixed(1)}% paid off</p>
                     </div>
                     <p className="text-sm text-text-secondary mt-2">Total Minimum Payments: <span className="font-semibold text-text-primary">{formatCurrency(totalMinimumPayments)}/month</span></p>
                 </CardContent>
@@ -203,7 +203,7 @@ const DebtDashboard: React.FC = () => {
                     {state.debts.sort((a,b) => b.interestRate - a.interestRate).map(debt => {
                         const progress = (1 - debt.currentBalance / debt.originalAmount) * 100;
                         return (
-                            <Card key={debt.id} className="hover:shadow-accent/10 transition-shadow group">
+                            <Card key={debt.id} className="hover:shadow-brand/10 transition-shadow group">
                                 <CardHeader>
                                     <div className="flex justify-between items-center">
                                         <CardTitle>{debt.name}</CardTitle>
@@ -212,7 +212,7 @@ const DebtDashboard: React.FC = () => {
                                                 {debt.interestRate.toFixed(1)}% APR
                                             </span>
                                             <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center space-x-1">
-                                                <button onClick={() => handleStartEditing(debt)} className="p-1 rounded-full text-text-secondary hover:text-accent hover:bg-surface"><Icons.Edit className="w-4 h-4" /></button>
+                                                <button onClick={() => handleStartEditing(debt)} className="p-1 rounded-full text-text-secondary hover:text-brand hover:bg-surface"><Icons.Edit className="w-4 h-4" /></button>
                                                 <button onClick={() => handleDeleteDebt(debt.id)} className="p-1 rounded-full text-text-secondary hover:text-danger hover:bg-surface"><Icons.Trash className="w-4 h-4" /></button>
                                             </div>
                                         </div>
@@ -225,9 +225,9 @@ const DebtDashboard: React.FC = () => {
                                             <span className="text-text-secondary">of {formatCurrency(debt.originalAmount)}</span>
                                         </div>
                                         <div className="w-full bg-primary rounded-full h-3">
-                                            <div className="bg-accent h-3 rounded-full" style={{ width: `${progress}%` }}></div>
+                                            <div className="bg-brand h-3 rounded-full" style={{ width: `${progress}%` }}></div>
                                         </div>
-                                        <div className="text-right text-sm text-accent font-bold mt-1">{progress.toFixed(1)}% Paid Off</div>
+                                        <div className="text-right text-sm text-brand font-bold mt-1">{progress.toFixed(1)}% Paid Off</div>
                                     </div>
                                     <div className="text-sm text-text-secondary">
                                         Minimum Payment: <span className="font-semibold text-text-primary">{formatCurrency(debt.minimumPayment)}</span>
